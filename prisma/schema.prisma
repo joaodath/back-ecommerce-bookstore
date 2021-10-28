@@ -11,58 +11,89 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  name         String
-  username     String         @unique
-  email        String         @unique
-  password     String
-  cpf          Int            @unique
-  cep          Int
-  country      String
-  state        String
-  city         String
-  address      String
-  phonenumber  String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  booksBought  Books[]
-  shoppingCart ShoppingCart[]
+  id              Int               @id @default(autoincrement())
+  name            String
+  username        String            @unique
+  email           String            @unique
+  password        String
+  cpf             String            @unique
+  cep             String
+  country         String
+  state           String
+  city            String
+  address         String
+  phonenumber     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  booksBought     Books[]
+  shoppingCart    ShoppingCart[]
+  shoppingHistory ShoppingHistory[]
 }
 
 model ShoppingCart {
-  id     Int    @id @default(autoincrement())
-  user   User[] @relation(fields: [userId], references: [id])
-  userId Int?
+  id                Int                 @id @default(autoincrement())
+  user              User[]              @relation(fields: [userId], references: [id])
+  userId            Int?
+  shoppingCartItems ShoppingCartItems[]
+  couponCode        CouponCodes[]       @relation(fields: [couponCodeId], references: [code])
+  couponCodeId      String?
+  discountAmount    Float
+  shippingPrice     Float
+  totalPrice        Float
+}
+
+model ShoppingCartItems {
+  id             Int            @id @default(autoincrement())
+  shoppingCart   ShoppingCart[] @relation(fields: [shoppingCartId], references: [id])
+  shoppingCartId Int?
+  book           Books[]        @relation(fields: [bookId], references: [id])
+  bookId         Int?
+  price          Int
+}
+
+model CouponCodes {
+  code            String            @id @unique
+  shoppingCart    ShoppingCart[]
+  shoppingHistory ShoppingHistory[]
+  discountAmount  Float
+  validUntil      DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  useLimit        Int
+  useCount        Int
 }
 
 model Books {
-  id              Int         @id @default(autoincrement())
-  title           String
-  author          Author[]
-  publisher       Publisher[]
-  category        Category[]
-  language        String?
-  edition         Int?
-  description     String
-  coverImg        String
-  ebook           Boolean?
-  hardCover       Boolean?
-  height          Int?
-  width           Int?
-  length          Int?
-  weight          Int?
-  isbn13          Int?        @unique
-  isbn10          Int?        @unique
-  score           Float?
-  price           Int
-  discountedPrice Int?
-  discountCheck   Boolean
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  user            User[]
+  id                   Int                   @id @default(autoincrement())
+  title                String
+  author               Authors[]
+  publisher            Publisher[]
+  category             Category[]
+  language             String
+  edition              Int
+  description          String                @db.VarChar(1000)
+  coverImg             String
+  ebook                Boolean               @default(true)
+  hardCover            Boolean               @default(false)
+  height               Int                   @default(0)
+  width                Int                   @default(0)
+  length               Int                   @default(0)
+  weight               Int                   @default(0)
+  isbn13               Int                   @unique @default(0)
+  isbn10               Int                   @unique @default(0)
+  score                Float                 @default(0)
+  price                Int
+  discountedPrice      Int?
+  discountCheck        Boolean               @default(false)
+  inventoryAmount      Int                   @default(0)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  shoppingHistoryItems ShoppingHistoryItem[]
+  shoppingCartItems    ShoppingCartItems[]
+  user                 User[]
 }
 
-model Author {
+model Authors {
   id    Int     @id @default(autoincrement())
   name  String
   books Books[]
@@ -78,4 +109,28 @@ model Category {
   id    Int     @id @default(autoincrement())
   name  String  @unique
   books Books[]
+}
+
+model ShoppingHistory {
+  id             Int                   @id @default(autoincrement())
+  user           User[]                @relation(fields: [userId], references: [id])
+  userId         Int?
+  items          ShoppingHistoryItem[]
+  totalPrice     Int
+  couponCode     CouponCodes[]         @relation(fields: [couponCodeId], references: [code])
+  couponCodeId   String?
+  couponCodeStr  String?
+  discountAmount Float
+  shippingPrice  Float
+  createdAt      DateTime              @default(now())
+}
+
+model ShoppingHistoryItem {
+  id                Int               @id @default(autoincrement())
+  books             Books[]           @relation(fields: [bookId], references: [id])
+  bookId            Int?
+  bookPrice         Int
+  createdAt         DateTime          @default(now())
+  shoppingHistory   ShoppingHistory[] @relation(fields: [shoppingHistoryId], references: [id])
+  shoppingHistoryId Int?
 }
