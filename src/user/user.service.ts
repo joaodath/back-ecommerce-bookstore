@@ -20,6 +20,10 @@ export class UserService {
     return await this.db.user.findUnique({ where: { id } });
   }
 
+  async findByUsername(username: string): Promise<User> {
+    return await this.db.user.findUnique({ where: { username } });
+  }
+
   async update(
     id: number,
     updateUserDto: Prisma.UserUpdateInput,

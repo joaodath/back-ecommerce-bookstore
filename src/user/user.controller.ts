@@ -37,6 +37,12 @@ export class UserController {
     return await this.userService.findUnique(id);
   }
 
+  @Get(':username')
+  @UsePipes(ValidationPipe)
+  async findByUsername(@Param('username') username: string): Promise<User> {
+    return await this.userService.findByUsername(username);
+  }
+
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
