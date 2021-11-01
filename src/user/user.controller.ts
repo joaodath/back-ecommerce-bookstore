@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,30 +20,35 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('new')
+  @UsePipes(ValidationPipe)
   async create(@Body() createUserDto: Prisma.UserCreateInput): Promise<User> {
     return await this.userService.create(createUserDto);
   }
 
   @Get('all')
+  @UsePipes(ValidationPipe)
   async findAll(): Promise<User[]> {
     return await this.userService.findAll();
   }
 
   @Get(':id')
-  async findUnique(@Param('id') id: string): Promise<User> {
-    return await this.userService.findUnique(+id);
+  @UsePipes(ValidationPipe)
+  async findUnique(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return await this.userService.findUnique(id);
   }
 
   @Patch(':id')
+  @UsePipes(ValidationPipe)
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: Prisma.UserUpdateInput,
   ): Promise<User> {
-    return await this.userService.update(+id, updateUserDto);
+    return await this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<User> {
-    return await this.userService.remove(+id);
+  @UsePipes(ValidationPipe)
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return await this.userService.remove(id);
   }
 }
