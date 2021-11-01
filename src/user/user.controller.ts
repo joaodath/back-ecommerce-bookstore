@@ -31,7 +31,7 @@ export class UserController {
     return await this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return await this.userService.findUnique(id);
