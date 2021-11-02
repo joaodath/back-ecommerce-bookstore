@@ -12,7 +12,7 @@ export class CreateBookDto {
   edition: number;
 
   @IsString()
-  @Length(2, 500)
+  @Length(2, 1000)
   description: string;
 
   @IsString()
