@@ -50,7 +50,7 @@ model ShoppingCartItems {
   shoppingCartId Int?
   book           Books[]        @relation(fields: [bookId], references: [id])
   bookId         Int?
-  price          Int
+  price          Float
 }
 
 model CouponCodes {
@@ -84,8 +84,8 @@ model Books {
   isbn13               Int                   @unique @default(0)
   isbn10               Int                   @unique @default(0)
   score                Float                 @default(0)
-  price                Int
-  discountedPrice      Int?
+  price                Float
+  discountedPrice      Float?
   discountCheck        Boolean               @default(false)
   inventoryAmount      Int                   @default(0)
   createdAt            DateTime              @default(now())
@@ -118,7 +118,7 @@ model ShoppingHistory {
   user           User[]                @relation(fields: [userId], references: [id])
   userId         Int?
   items          ShoppingHistoryItem[]
-  totalPrice     Int
+  totalPrice     Float
   couponCode     CouponCodes[]         @relation(fields: [couponCodeId], references: [code])
   couponCodeId   String?
   couponCodeStr  String?
@@ -131,7 +131,7 @@ model ShoppingHistoryItem {
   id                Int               @id @default(autoincrement())
   books             Books[]           @relation(fields: [bookId], references: [id])
   bookId            Int?
-  bookPrice         Int
+  bookPrice         Float
   createdAt         DateTime          @default(now())
   shoppingHistory   ShoppingHistory[] @relation(fields: [shoppingHistoryId], references: [id])
   shoppingHistoryId Int?
