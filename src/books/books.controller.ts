@@ -45,7 +45,7 @@ export class BooksController {
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateBookDto: Prisma.UserUpdateInput,
+    @Body() updateBookDto: Prisma.BooksUpdateInput,
   ): Promise<Books> {
     return await this.booksService.update(id, updateBookDto);
   }
