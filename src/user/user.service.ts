@@ -56,7 +56,11 @@ export class UserService {
   }
 
   async findByUsername(username: string): Promise<User> {
-    return await this.db.user.findUnique({ where: { username } });
+    const user = this.db.user.findUnique({ where: { username: username } });
+    if (!user) {
+      throw new NotFoundException();
+    }
+    return user;
   }
 
   async update(
