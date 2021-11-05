@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { CreateShoppingHistoryDto } from './dto/create-shopping-history.dto';
-import { UpdateShoppingHistoryDto } from './dto/update-shopping-history.dto';
+import { Prisma, ShoppingHistory } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class ShoppingHistoryService {
-  create(createShoppingHistoryDto: CreateShoppingHistoryDto) {
-    return 'This action adds a new shoppingHistory';
+  constructor(private db: PrismaService) {}
+
+  async create(
+    createShoppingHistoryDto: Prisma.ShoppingHistoryCreateInput,
+  ): Promise<ShoppingHistory> {
+    return await this.db.shoppingHistory.create({
+      data: createShoppingHistoryDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all shoppingHistory`;
+  async findAll(): Promise<ShoppingHistory[]> {
+    return await this.db.shoppingHistory.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} shoppingHistory`;
+  async findUnique(id: number): Promise<ShoppingHistory> {
+    return await this.db.shoppingHistory.findUnique({ where: { id } });
   }
 
-  update(id: number, updateShoppingHistoryDto: UpdateShoppingHistoryDto) {
-    return `This action updates a #${id} shoppingHistory`;
+  async update(
+    id: number,
+    updateShoppingHistoryDto: Prisma.ShoppingHistoryUpdateInput,
+  ): Promise<ShoppingHistory> {
+    return await this.db.shoppingHistory.update({
+      where: { id },
+      data: updateShoppingHistoryDto,
+    });
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} shoppingHistory`;
+  async remove(id: number): Promise<ShoppingHistory> {
+    return await this.db.shoppingHistory.delete({ where: { id }});
   }
 }

@@ -1,34 +1,63 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ShoppingHistoryService } from './shopping-history.service';
-import { CreateShoppingHistoryDto } from './dto/create-shopping-history.dto';
-import { UpdateShoppingHistoryDto } from './dto/update-shopping-history.dto';
+import { Prisma, ShoppingHistory } from '.prisma/client';
 
 @Controller('shopping-history')
 export class ShoppingHistoryController {
-  constructor(private readonly shoppingHistoryService: ShoppingHistoryService) {}
+  constructor(
+    private readonly shoppingHistoryService: ShoppingHistoryService,
+  ) {}
 
-  @Post()
-  create(@Body() createShoppingHistoryDto: CreateShoppingHistoryDto) {
-    return this.shoppingHistoryService.create(createShoppingHistoryDto);
+  @Post('new')
+  @UsePipes(ValidationPipe)
+  async create(
+    @Body() createShoppingHistoryDto: Prisma.ShoppingHistoryCreateInput,
+  ): Promise<ShoppingHistory> {
+    return await this.shoppingHistoryService.create(createShoppingHistoryDto);
   }
 
-  @Get()
-  findAll() {
-    return this.shoppingHistoryService.findAll();
+  @Get('all')
+  @UsePipes(ValidationPipe)
+  async findAll(): Promise<ShoppingHistory[]> {
+    return await this.shoppingHistoryService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.shoppingHistoryService.findOne(+id);
+  @Get('/id/:id')
+  @UsePipes(ValidationPipe)
+  async findUnique(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ShoppingHistory> {
+    return await this.shoppingHistoryService.findUnique(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateShoppingHistoryDto: UpdateShoppingHistoryDto) {
-    return this.shoppingHistoryService.update(+id, updateShoppingHistoryDto);
+  @UsePipes(ValidationPipe)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateShoppingHistoryDto: Prisma.ShoppingHistoryUpdateInput,
+  ): Promise<ShoppingHistory> {
+    return await this.shoppingHistoryService.update(
+      id,
+      updateShoppingHistoryDto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.shoppingHistoryService.remove(+id);
+  @UsePipes(ValidationPipe)
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ShoppingHistory> {
+    return await this.shoppingHistoryService.remove(id);
   }
 }
