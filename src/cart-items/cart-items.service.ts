@@ -1,26 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ShoppingCartService } from 'src/cart/cart.service';
+import { BooksService } from 'src/books/books.service';
 
 @Injectable()
 export class ShoppingCartItemsService {
-  constructor(private db: PrismaService) {}
+  constructor(
+    private db: PrismaService,
+    private cart: ShoppingCartService,
+    private book: BooksService,
+  ) {}
 
   async createItem(
     createCartItemDto: Prisma.ShoppingCartItemsCreateInput,
   ): Promise<ShoppingCartItems> {
-    const shoppingCart = createCartItemDto.shoppingCart.connect;
-    const book = createCartItemDto.book.connect;
+    const bookObject = await this.book.findUnique(createCartItemDto.bookId);
+    const bookPrice =
+      bookObject.discountCheck === true
+        ? bookObject.discountedPrice
+        : bookObject.price;
 
     return await this.db.shoppingCartItems.create({
       data: {
         ...createCartItemDto,
-        shoppingCart: {
-          connect: shoppingCart,
-        },
-        book: {
-          connect: book,
-        },
+        price: bookPrice,
+      },
+      shoppingCart: {
+        connect: { id: createCartItemDto.shoppingCartId },
+      },
+      book: {
+        connect: { id: createCartItemDto.bookId },
       },
     });
   }
