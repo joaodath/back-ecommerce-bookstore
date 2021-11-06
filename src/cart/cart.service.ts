@@ -26,6 +26,9 @@ export class ShoppingCartService {
           connect: couponCode,
         },
       },
+      include: {
+        shoppingCartItems: true,
+      },
     });
   }
 
@@ -50,6 +53,9 @@ export class ShoppingCartService {
         couponCode: {
           connect: couponCode,
         },
+      },
+      include: {
+        shoppingCartItems: true,
       },
     });
   }
