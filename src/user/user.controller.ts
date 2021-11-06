@@ -50,6 +50,18 @@ export class UserController {
     return await this.userService.update(id, updateUserDto);
   }
 
+  @Patch('disable/:username')
+  @UsePipes(ValidationPipe)
+  async disable(@Param('username') username: string): Promise<User> {
+    return await this.userService.disable(username);
+  }
+
+  @Patch('/softdelete/:username')
+  @UsePipes(ValidationPipe)
+  async softDelete(@Param('username') username: string): Promise<User> {
+    return await this.userService.softDelete(username);
+  }
+
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<User> {
