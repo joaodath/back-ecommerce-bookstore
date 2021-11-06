@@ -14,3 +14,20 @@
 - Encontrar um Livro pelo Title: `/books/:title`
 - Editar informações do Livro (Patch): `/books/:id`
 - Deletar Livro: `/books/:id`
+
+## Autenticação
+Para adicionar autenticação nas rotas, use o Guard de autenticação da seguinte forma:
+
+No arquivo .module.ts, insira:
+```
+imports: [AuthModule],
+```
+
+No arquivo .controller.ts, insira:
+
+```
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+
+@UseGuards(JwtAuthGuard)
+#dados da rota aqui
+```
