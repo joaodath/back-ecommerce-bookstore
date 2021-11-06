@@ -39,9 +39,10 @@ model ShoppingCart {
   shoppingCartItems ShoppingCartItems[]
   couponCode        CouponCodes[]       @relation(fields: [couponCodeId], references: [code])
   couponCodeId      String?
-  discountAmount    Float
-  shippingPrice     Float
-  totalPrice        Float
+  discountAmount    Float?
+  shippingPrice     Float?
+  totalPrice        Float?
+  isAnonymous Boolean @default(true)
 }
 
 model ShoppingCartItems {
@@ -51,6 +52,7 @@ model ShoppingCartItems {
   book           Books[]        @relation(fields: [bookId], references: [id])
   bookId         Int?
   price          Int
+  quantity Int
 }
 
 model CouponCodes {
