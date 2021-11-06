@@ -73,4 +73,59 @@ export class UserService {
   async remove(id: number): Promise<User> {
     return await this.db.user.delete({ where: { id } });
   }
+
+  async softDelete(username: string): Promise<User> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+
+    user.email = 'user deleted';
+    user.password = 'user deleted';
+    user.profilePhoto = 'user deleted';
+    user.phonenumber = 'user deleted';
+    user.active = false;
+    user.deleted = true;
+
+    await this.db.user.update({
+      where: { username: username },
+      data: user,
+    });
+
+    return await this.db.user.findUnique({
+      where: { username: username },
+      include: {
+        booksBought: true,
+        shoppingCart: true,
+        shoppingHistory: true,
+      },
+    });
+  }
+
+  async enable(username: string): Promise<User> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    if (user.deleted === false) {
+      return await this.db.user.update({
+        where: { username: username },
+        data: { active: true },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async disable(username: string): Promise<User> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    if (user.deleted === false) {
+      return await this.db.user.update({
+        where: { username: username },
+        data: { active: false },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
 }
