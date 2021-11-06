@@ -9,16 +9,48 @@ export class ShoppingCartService {
   async createCart(
     createCartDto: Prisma.ShoppingCartCreateInput,
   ): Promise<ShoppingCart> {
-    return await this.db.shoppingCart.create({ data: createCartDto });
+    const cartItem = createCartDto.shoppingCartItems.connect;
+    const user = createCartDto.user.connect;
+    const couponCode = createCartDto.couponCode.connect;
+
+    return await this.db.shoppingCart.create({
+      data: {
+        ...createCartDto,
+        shoppingCartItems: {
+          connect: cartItem,
+        },
+        user: {
+          connect: user,
+        },
+        couponCode: {
+          connect: couponCode,
+        },
+      },
+    });
   }
 
   async updateCart(
     id: number,
     updateCartDto: Prisma.ShoppingCartUpdateInput,
   ): Promise<ShoppingCart> {
+    const cartItem = updateCartDto.shoppingCartItems.connect;
+    const user = updateCartDto.user.connect;
+    const couponCode = updateCartDto.couponCode.connect;
+
     return await this.db.shoppingCart.update({
       where: { id },
-      data: updateCartDto,
+      data: {
+        ...updateCartDto,
+        shoppingCartItems: {
+          connect: cartItem,
+        },
+        user: {
+          connect: user,
+        },
+        couponCode: {
+          connect: couponCode,
+        },
+      },
     });
   }
 }
