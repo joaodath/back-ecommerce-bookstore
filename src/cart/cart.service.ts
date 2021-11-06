@@ -9,27 +9,18 @@ export class ShoppingCartService {
   async createCart(
     createCartDto: Prisma.ShoppingCartCreateInput,
   ): Promise<ShoppingCart> {
-    const cartItem = createCartDto.shoppingCartItems.connect;
-    const user = createCartDto.user.connect;
-    const couponCode = createCartDto.couponCode.connect;
-
-    return await this.db.shoppingCart.create({
-      data: {
-        ...createCartDto,
-        shoppingCartItems: {
-          connect: cartItem,
-        },
+    if (createCartDto.userId) {
+      return await this.db.shoppingCart.create({
+        data: { ...createCartDto, isAnonymous: false },
         user: {
-          connect: user,
+          connect: { id: createCartDto.userId },
         },
-        couponCode: {
-          connect: couponCode,
-        },
-      },
-      include: {
-        shoppingCartItems: true,
-      },
-    });
+      });
+    } else {
+      return await this.db.shoppingCart.create({
+        data: { ...createCartDto, isAnonymous: true },
+      });
+    }
   }
 
   async updateCart(

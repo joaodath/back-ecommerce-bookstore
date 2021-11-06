@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreateCartDto {
   @IsNumber()
@@ -15,4 +15,7 @@ export class CreateCartDto {
 
   @IsNumber()
   totalPrice: number;
+
+  @IsBoolean()
+  isAnonymous: boolean;
 }
