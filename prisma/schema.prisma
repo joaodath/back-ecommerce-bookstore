@@ -16,15 +16,15 @@ model User {
   username        String            @unique
   email           String            @unique
   password        String
-  profilePhoto    String
+  profilePhoto    String?
   birthDate       DateTime
   cpf             String            @unique
-  cep             String
-  country         String
-  state           String
-  city            String
-  address         String
-  phonenumber     String
+  cep             String?
+  country         String?
+  state           String?
+  city            String?
+  address         String?
+  phonenumber     String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   booksBought     Books[]
