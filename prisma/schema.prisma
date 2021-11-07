@@ -30,6 +30,8 @@ model User {
   booksBought     Books[]
   shoppingCart    ShoppingCart[]
   shoppingHistory ShoppingHistory[]
+  active          Boolean           @default(true)
+  deleted         Boolean           @default(false)
   wishList        WishList[]
 }
 
