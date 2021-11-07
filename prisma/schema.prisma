@@ -96,7 +96,7 @@ model Books {
   shoppingHistoryItems ShoppingHistoryItem[]
   shoppingCartItems    ShoppingCartItems[]
   user                 User[]
-  wishListItems        WishListItems[]
+  wishList             WishList[]
 }
 
 model Authors {
@@ -142,16 +142,8 @@ model ShoppingHistoryItem {
 }
 
 model WishList {
-  id     Int             @id @default(autoincrement())
-  user   User[]          @relation(fields: [userId], references: [id])
+  id     Int     @id @default(autoincrement())
+  user   User[]  @relation(fields: [userId], references: [id])
   userId Int
-  items  WishListItems[]
-}
-
-model WishListItems {
-  id         Int        @id @default(autoincrement())
-  wishList   WishList[] @relation(fields: [wishListId], references: [id])
-  wishListId Int?
-  book       Books[]    @relation(fields: [bookId], references: [id])
-  bookId     Int?
+  books  Books[]
 }

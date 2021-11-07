@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
 import { WishlistModule } from './wishlist/wishlist.module';
-import { WishlistItemsModule } from './wishlist-items/wishlist-items.module';
 
 @Module({
   imports: [
@@ -20,7 +19,6 @@ import { WishlistItemsModule } from './wishlist-items/wishlist-items.module';
     AuthModule,
     BooksModule,
     WishlistModule,
-    WishlistItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
