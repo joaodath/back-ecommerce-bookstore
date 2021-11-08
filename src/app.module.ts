@@ -7,6 +7,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
+import { ShoppingHistoryModule } from './shopping-history/shopping-history.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BooksModule } from './books/books.module';
     PrismaModule,
     AuthModule,
     BooksModule,
+    ShoppingHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
