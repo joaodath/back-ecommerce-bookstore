@@ -25,12 +25,12 @@ export class ShoppingCartItemsService {
       data: {
         ...createCartItemDto,
         price: bookPrice,
-      },
-      shoppingCart: {
-        connect: { id: createCartItemDto.shoppingCartId },
-      },
-      book: {
-        connect: { id: createCartItemDto.bookId },
+        shoppingCart: {
+          connect: { id: createCartItemDto.shoppingCartId },
+        },
+        book: {
+          connect: { id: createCartItemDto.bookId },
+        },
       },
     });
   }
