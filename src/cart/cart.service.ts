@@ -10,10 +10,20 @@ export class ShoppingCartService {
     createCartDto: Prisma.ShoppingCartCreateInput,
   ): Promise<ShoppingCart> {
     if (createCartDto.userId) {
-      return await this.db.shoppingCart.create({
-        data: { ...createCartDto, isAnonymous: false },
-        user: {
-          connect: { id: createCartDto.userId },
+      const newCart = await this.db.shoppingCart.create({
+        data: {
+          ...createCartDto,
+          isAnonymous: false,
+        },
+      });
+      return await this.db.shoppingCart.update({
+        where: { id: newCart.id },
+        data: {
+          user: {
+            connect: {
+              id: createCartDto.userId,
+            },
+          },
         },
       });
     } else {
@@ -24,30 +34,32 @@ export class ShoppingCartService {
   }
 
   async updateCart(
-    id: number,
     updateCartDto: Prisma.ShoppingCartUpdateInput,
+    id: number,
   ): Promise<ShoppingCart> {
-    const cartItem = updateCartDto.shoppingCartItems.connect;
-    const user = updateCartDto.user.connect;
-    const couponCode = updateCartDto.couponCode.connect;
-
-    return await this.db.shoppingCart.update({
-      where: { id },
-      data: {
-        ...updateCartDto,
-        shoppingCartItems: {
-          connect: cartItem,
+    if (updateCartDto.userId) {
+      return await this.db.shoppingCart.update({
+        where: { id },
+        data: {
+          ...updateCartDto,
+          isAnonymous: false,
+          user: {
+            update: {
+              where: {
+                id: updateCartDto.userId,
+              },
+            },
+          },
         },
-        user: {
-          connect: user,
+      });
+    } else {
+      return await this.db.shoppingCart.update({
+        where: { id },
+        data: {
+          ...updateCartDto,
+          isAnonymous: true,
         },
-        couponCode: {
-          connect: couponCode,
-        },
-      },
-      include: {
-        shoppingCartItems: true,
-      },
-    });
+      });
+    }
   }
 }
