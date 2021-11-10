@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, ShoppingCartItems } from '.prisma/client';
+import { ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartService } from 'src/cart/cart.service';
 import { BooksService } from 'src/books/books.service';
+import { CreateCartItemsDto } from './dto/create-cart-items.dto';
+import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
@@ -13,23 +15,26 @@ export class ShoppingCartItemsService {
   ) {}
 
   async createItem(
-    createCartItemDto: Prisma.ShoppingCartItemsCreateInput,
+    createCartItemDto: CreateCartItemsDto,
+    bookId: number,
   ): Promise<ShoppingCartItems> {
-    const bookObject = await this.book.findUnique(createCartItemDto.bookId);
+    const bookObject = await this.book.findUnique(bookId);
     const bookPrice =
       bookObject.discountCheck === true
         ? bookObject.discountedPrice
         : bookObject.price;
+    const totalPrice = bookPrice * createCartItemDto.quantity;
 
     return await this.db.shoppingCartItems.create({
       data: {
         ...createCartItemDto,
         price: bookPrice,
+        totalPrice: totalPrice,
         shoppingCart: {
           connect: { id: createCartItemDto.shoppingCartId },
         },
         book: {
-          connect: { id: createCartItemDto.bookId },
+          connect: { id: bookId },
         },
       },
     });
@@ -39,23 +44,85 @@ export class ShoppingCartItemsService {
     return await this.db.shoppingCartItems.findMany();
   }
 
+  async findMany(
+    shoppingCartId: number,
+    bookId: number,
+  ): Promise<ShoppingCartItems[] | number> {
+    const cartItem = await this.db.shoppingCartItems.findMany({
+      where: { shoppingCartId: shoppingCartId, bookId: bookId },
+    });
+
+    if (cartItem.length !== 0) {
+      return cartItem;
+    } else {
+      return -1;
+    }
+  }
+
+  async findUnique(id: number): Promise<ShoppingCartItems> {
+    return await this.db.shoppingCartItems.findUnique({
+      where: { id: id },
+      include: {
+        book: {
+          select: {
+            title: true,
+            author: true,
+            publisher: true,
+            coverImg: true,
+          },
+        },
+      },
+    });
+  }
+
   async updateItem(
-    id: number,
-    updateCartItemDto: Prisma.ShoppingCartItemsUpdateInput,
-  ): Promise<ShoppingCartItems> {
-    const shoppingCart = updateCartItemDto.shoppingCart.connect;
-    const book = updateCartItemDto.book.connect;
+    updateCartItemDto: UpdateCartItemsDto,
+  ): Promise<ShoppingCartItems | number> {
+    const cartItem = await this.findMany(
+      updateCartItemDto.shoppingCartId,
+      updateCartItemDto.bookId,
+    );
+
+    if (cartItem !== -1) {
+      const bookObject = await this.book.findUnique(updateCartItemDto.bookId);
+      const bookPrice =
+        bookObject.discountCheck === true
+          ? bookObject.discountedPrice
+          : bookObject.price;
+      const totalPrice = bookPrice * updateCartItemDto.quantity;
+
+      return await this.db.shoppingCartItems.update({
+        where: { id: cartItem[0].id },
+        data: {
+          ...updateCartItemDto,
+          price: bookPrice,
+          totalPrice: totalPrice,
+        },
+      });
+    } else {
+      return -1;
+    }
+  }
+
+  async updateItemId(
+    updateCartItemDto: UpdateCartItemsDto,
+  ): Promise<ShoppingCartItems | number> {
+    const cartItem = await this.findUnique(
+      updateCartItemDto.shoppingCartItemId,
+    );
+    const bookObject = await this.book.findUnique(updateCartItemDto.bookId);
+    const bookPrice =
+      bookObject.discountCheck === true
+        ? bookObject.discountedPrice
+        : bookObject.price;
+    const totalPrice = bookPrice * updateCartItemDto.quantity;
 
     return await this.db.shoppingCartItems.update({
-      where: { id },
+      where: { id: cartItem[0].id },
       data: {
         ...updateCartItemDto,
-        shoppingCart: {
-          connect: shoppingCart,
-        },
-        book: {
-          connect: book,
-        },
+        price: bookPrice,
+        totalPrice: totalPrice,
       },
     });
   }

@@ -2,11 +2,17 @@ import { IsNumber } from 'class-validator';
 
 export class CreateCartItemsDto {
   @IsNumber()
-  shoppingCartId: number;
+  shoppingCartId?: number;
 
   @IsNumber()
   bookId: number;
 
   @IsNumber()
-  price: number;
+  quantity: number;
+
+  @IsNumber()
+  price?: number;
+
+  @IsNumber()
+  shoppingCartItemId?: number;
 }
