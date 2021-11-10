@@ -63,6 +63,11 @@ export class UserService {
     return user;
   }
 
+  async findByUsernameJWT(username: string): Promise<User> {
+    const user = this.db.user.findUnique({ where: { username: username } });
+    return user;
+  }
+
   async update(
     id: number,
     updateUserDto: Prisma.UserUpdateInput,
