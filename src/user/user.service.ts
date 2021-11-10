@@ -8,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Prisma, User } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { userWithoutPasswordDto } from './dto/user-without-password.dto';
 @Injectable()
 export class UserService {
   constructor(private db: PrismaService) {}
@@ -55,12 +56,15 @@ export class UserService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<User> {
-    const user = this.db.user.findUnique({ where: { username: username } });
+  async findByUsername(username: string): Promise<userWithoutPasswordDto> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
     if (!user) {
       throw new NotFoundException();
     }
-    return user;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async findByUsernameJWT(username: string): Promise<User> {
