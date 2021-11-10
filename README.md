@@ -6,6 +6,9 @@
 - Encontrar um usuário por USERNAME: `/user/:username`
 - Editar informações do Usuário (Patch): `/user/:id`
 - Deletar Usuário: `/user/:id`
+- Soft Delete de Usuário: `/user/softdelete/:username`
+- Desativar Usuário: `/user/disable/:username`
+- Ativar Usuário: **rota interna**
   
 ### Rotas de Produto
 > Ainda sem autenticação.
