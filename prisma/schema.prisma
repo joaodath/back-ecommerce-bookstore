@@ -49,10 +49,10 @@ model ShoppingCartItems {
   id             Int            @id @default(autoincrement())
   shoppingCart   ShoppingCart[] @relation(fields: [shoppingCartId], references: [id])
   shoppingCartId Int?
-  book           Books[]        @relation(fields: [bookId], references: [id])
-  bookId         Int?
-  price          Int
+  book           Books[]
+  price          Float
   quantity Int
+  totalPrice Float
 }
 
 model CouponCodes {
