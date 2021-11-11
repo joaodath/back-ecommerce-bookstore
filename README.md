@@ -1,13 +1,14 @@
 ## Rotas
 ### Rotas de Usuário
-> Ainda sem autenticação. 
-- Criar Usuário: `/user/new`
-- Encontrar um usuário por ID: `/user/id/:id`
-- Encontrar um usuário por USERNAME: `/user/:username`
-- Editar informações do Usuário (Patch): `/user/:id`
-- Deletar Usuário: `/user/:id`
-- Soft Delete de Usuário: `/user/softdelete/:username`
-- Desativar Usuário: `/user/disable/:username`
+> Parcialmente sem autenticação. 
+- Criar Usuário: `/user/new` (POST)
+- Encontrar um usuário por `ID`: `/user/id/:id` (GET)
+- [Rota Protegida] Encontrar um usuário por `USERNAME`: `/user/` (GET)
+- - `USERNAME` agora deve ser informado via token JWT
+- Editar informações do Usuário: `/user/:id` (PATCH)
+- Hard Delete de Usuário: `/user/:id` (DELETE)
+- Soft Delete de Usuário: `/user/softdelete/:username` (PATCH)
+- Desativar Usuário: `/user/disable/:username` (PATCH)
 - Ativar Usuário: **rota interna**
   
 ### Rotas de Produto
