@@ -11,9 +11,8 @@ datasource db {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
   name            String
-  username        String            @unique
+  username        String            @id
   email           String            @unique
   password        String
   profilePhoto    String
@@ -34,8 +33,8 @@ model User {
 
 model ShoppingCart {
   id                Int                 @id @default(autoincrement())
-  user              User[]              @relation(fields: [userId], references: [id])
-  userId            Int?
+  user              User[]              @relation(fields: [username], references: [username])
+  username            String? @unique
   shoppingCartItems ShoppingCartItems[]
   couponCode        CouponCodes[]       @relation(fields: [couponCodeId], references: [code])
   couponCodeId      String?
@@ -117,8 +116,8 @@ model Category {
 
 model ShoppingHistory {
   id             Int                   @id @default(autoincrement())
-  user           User[]                @relation(fields: [userId], references: [id])
-  userId         Int?
+  user           User[]                @relation(fields: [username], references: [username])
+  username         String?
   items          ShoppingHistoryItem[]
   totalPrice     Int
   couponCode     CouponCodes[]         @relation(fields: [couponCodeId], references: [code])
