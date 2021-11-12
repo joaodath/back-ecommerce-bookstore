@@ -1,26 +1,108 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, WishList } from '.prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class WishlistService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  constructor(private db: PrismaService) {}
+  async create(
+    username: string,
+    createWishlistDto: Prisma.WishListCreateInput,
+  ): Promise<WishList> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    if (!user.active || !user.deleted) {
+      throw new NotFoundException();
+    }
+
+    const wishlist = await this.db.wishList.create({
+      data: createWishlistDto,
+    });
+
+    await this.db.wishList.update({
+      where: { id: wishlist.id },
+      data: {
+        user: {
+          connect: {
+            username: username,
+          },
+        },
+      },
+    });
+
+    const wishlistReturn = await this.db.wishList.findUnique({
+      where: {
+        id: wishlist.id,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+        books: true,
+      },
+    });
+
+    return wishlistReturn;
   }
 
-  findAll() {
-    return `This action returns all wishlist`;
+  async findAll(): Promise<WishList[]> {
+    return await this.db.wishList.findMany({});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
+  async findUnique(id: number): Promise<WishList> {
+    const wishlist = await this.db.wishList.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+        books: true,
+      },
+    });
+
+    return wishlist;
   }
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
+  async update(
+    id: number,
+    updateWishlistDto: Prisma.WishListUpdateInput,
+  ): Promise<WishList> {
+    const updateWishlist = await this.db.wishList.update({
+      where: { id: id },
+      data: updateWishlistDto,
+    });
+    return updateWishlist;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+  async addBook(
+    userId: number,
+    wishListId: number,
+    bookId: number,
+  ): Promise<WishList> {
+    await this.db.wishList.findUnique({
+      where: { userId: userId },
+    });
+    await this.db.wishList.update({
+      where: { id: wishListId },
+      data: {
+        books: {
+          connect: {
+            id: bookId,
+          },
+        },
+      },
+    });
+    return await this.findUnique(wishListId);
+  }
+
+  async remove(id: number): Promise<WishList> {
+    return await this.db.wishList.delete({ where: { id: id } });
   }
 }

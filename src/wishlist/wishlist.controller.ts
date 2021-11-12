@@ -1,5 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { WishlistService } from './wishlist.service';
+import { Prisma, WishList } from '.prisma/client';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
@@ -7,27 +19,45 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 export class WishlistController {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistService.create(createWishlistDto);
+  @Post(':username')
+  @UsePipes(ValidationPipe)
+  async create(
+    @Param('username') username: string,
+    @Body() createWishlistDto: Prisma.WishListCreateInput,
+  ): Promise<WishList> {
+    return this.wishlistService.create(username, createWishlistDto);
   }
 
-  @Get()
-  findAll() {
+  @Get('all')
+  @UsePipes(ValidationPipe)
+  async findAll(): Promise<WishList[]> {
     return this.wishlistService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistService.findOne(+id);
+  @UsePipes(ValidationPipe)
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<WishList> {
+    return this.wishlistService.findUnique(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistService.update(+id, updateWishlistDto);
+  @UsePipes(ValidationPipe)
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateWishlistDto: Prisma.WishListUpdateInput,
+  ) {
+    return this.wishlistService.update(id, updateWishlistDto);
   }
 
+  @Patch(':username/:wishListId/:bookId')
+  @UsePipes(ValidationPipe)
+  async addBook(
+    @Param('username', 'wishListId', 'bookId') username: string, wishListId: string, bookId: string): Promise<WishList> {
+      return this.wishlistService.addBook(username, wishListId, bookId)
+    }
+  );
   @Delete(':id')
+  @UsePipes(ValidationPipe)
   remove(@Param('id') id: string) {
     return this.wishlistService.remove(+id);
   }
