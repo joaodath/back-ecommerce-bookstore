@@ -11,9 +11,8 @@ datasource db {
 }
 
 model User {
-  id              Int               @id @default(autoincrement())
   name            String
-  username        String            @unique
+  username        String            @id
   email           String            @unique
   password        String
   profilePhoto    String?
@@ -36,23 +35,25 @@ model User {
 
 model ShoppingCart {
   id                Int                 @id @default(autoincrement())
-  user              User[]              @relation(fields: [userId], references: [id])
-  userId            Int?
+  user              User[]              @relation(fields: [username], references: [username])
+  username            String? @unique
   shoppingCartItems ShoppingCartItems[]
   couponCode        CouponCodes[]       @relation(fields: [couponCodeId], references: [code])
   couponCodeId      String?
-  discountAmount    Float
-  shippingPrice     Float
-  totalPrice        Float
+  discountAmount    Float?
+  shippingPrice     Float?
+  totalPrice        Float?
+  isAnonymous Boolean @default(true)
 }
 
 model ShoppingCartItems {
   id             Int            @id @default(autoincrement())
   shoppingCart   ShoppingCart[] @relation(fields: [shoppingCartId], references: [id])
   shoppingCartId Int?
-  book           Books[]        @relation(fields: [bookId], references: [id])
-  bookId         Int?
+  book           Books[]
   price          Float
+  quantity Int
+  totalPrice Float
 }
 
 model CouponCodes {
@@ -117,8 +118,8 @@ model Category {
 
 model ShoppingHistory {
   id             Int                   @id @default(autoincrement())
-  user           User[]                @relation(fields: [userId], references: [id])
-  userId         Int?
+  user           User[]                @relation(fields: [username], references: [username])
+  username         String? @unique
   items          ShoppingHistoryItem[]
   totalPrice     Float
   couponCode     CouponCodes[]         @relation(fields: [couponCodeId], references: [code])
