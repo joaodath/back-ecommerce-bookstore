@@ -1,21 +1,23 @@
 import {
   Controller,
   Post,
-  Patch,
   Body,
   Param,
   UsePipes,
   ValidationPipe,
   ParseIntPipe,
+  Request,
+  Delete,
 } from '@nestjs/common';
 import { ShoppingCartService } from './cart.service';
-import { Prisma, ShoppingCart } from '.prisma/client';
+import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
+import { AddItemDto } from './dto/add-item.dto';
 
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: ShoppingCartService) {}
 
-  @Post('cart')
+  @Post()
   @UsePipes(ValidationPipe)
   async createCart(
     @Body() createCartDto: Prisma.ShoppingCartCreateInput,
@@ -23,12 +25,21 @@ export class CartController {
     return await this.cartService.createCart(createCartDto);
   }
 
-  @Patch(':id')
+  @Post('/add')
   @UsePipes(ValidationPipe)
-  async updateCart(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateCartDto: Prisma.ShoppingCartUpdateInput,
+  async addItem(
+    @Request() req,
+    @Body() addItemDto: AddItemDto,
   ): Promise<ShoppingCart> {
-    return await this.cartService.updateCart(id, updateCartDto);
+    return await this.cartService.addItem(req.user.username, addItemDto);
+  }
+
+  @Delete('item/:id')
+  @UsePipes(ValidationPipe)
+  async deleteItem(
+    @Request() req,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ShoppingCartItems> {
+    return await this.cartService.deleteItem(req.user.username, id);
   }
 }

@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma, ShoppingCart } from '.prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
 import { BooksService } from 'src/books/books.service';
@@ -43,8 +43,15 @@ export class ShoppingCartService {
     }
   }
 
-  async addItem(addItemDto: AddItemDto): Promise<ShoppingCart> {
-    const cartItem = await this.cartItems.findMany(
+  async addItem(
+    username: string,
+    addItemDto: AddItemDto,
+  ): Promise<ShoppingCart> {
+    const shoppingCartId = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    addItemDto.shoppingCartId = shoppingCartId.id;
+    const cartItem = await this.cartItems.findManyBookId(
       addItemDto.shoppingCartId,
       addItemDto.bookId,
     );
@@ -83,6 +90,8 @@ export class ShoppingCartService {
     if (cartItem) {
       const updateItem = await this.cartItems.updateItem(updateItemDto);
       return await this.findUnique(updateItemDto.shoppingCartId);
+    } else {
+      throw new NotFoundException();
     }
   }
 
@@ -106,38 +115,23 @@ export class ShoppingCartService {
     });
   }
 
-  async deleteItem(id: number): Promise<ShoppingCart> {
-    const cartItem = await this.cartItems.removeItem(id);
-    return await this.deleteItem(id);
-  }
+  async deleteItem(
+    username: string,
+    bookId: number,
+  ): Promise<ShoppingCartItems> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    const shoppingCartId = shoppingCart.id;
+    const cartItem = await this.cartItems.findManyBookId(
+      shoppingCartId,
+      bookId,
+    );
 
-//   async updateCart(
-//     updateCartDto: Prisma.ShoppingCartUpdateInput,
-//     id: number,
-//   ): Promise<ShoppingCart> {
-//     if (updateCartDto.userId) {
-//       return await this.db.shoppingCart.update({
-//         where: { id },
-//         data: {
-//           ...updateCartDto,
-//           isAnonymous: false,
-//           user: {
-//             update: {
-//               where: {
-//                 id: updateCartDto.userId,
-//               },
-//             },
-//           },
-//         },
-//       });
-//     } else {
-//       return await this.db.shoppingCart.update({
-//         where: { id },
-//         data: {
-//           ...updateCartDto,
-//           isAnonymous: true,
-//         },
-//       });
-//     }
-//   }
-// }
+    if (cartItem === -1) {
+      throw new NotFoundException();
+    } else {
+      return await this.cartItems.removeItem(bookId);
+    }
+  }
+}

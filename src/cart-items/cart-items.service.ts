@@ -44,19 +44,33 @@ export class ShoppingCartItemsService {
     return await this.db.shoppingCartItems.findMany();
   }
 
-  async findMany(
+  findObj(
+    array: ShoppingCartItems[],
+    id: number,
+  ): ShoppingCartItems | undefined {
+    return array.find((item) => item.id === id);
+  }
+
+  async findManyBookId(
     shoppingCartId: number,
     bookId: number,
-  ): Promise<ShoppingCartItems[] | number> {
+  ): Promise<ShoppingCartItems | number> {
     const cartItem = await this.db.shoppingCartItems.findMany({
-      where: { shoppingCartId: shoppingCartId, bookId: bookId },
+      where: { shoppingCartId: shoppingCartId },
     });
+    const cartItemBookId = this.findObj(cartItem, bookId);
 
-    if (cartItem.length !== 0) {
-      return cartItem;
+    if (cartItemBookId) {
+      return cartItemBookId;
     } else {
       return -1;
     }
+  }
+
+  async findMany(shoppingCartId: number): Promise<ShoppingCartItems[]> {
+    return await this.db.shoppingCartItems.findMany({
+      where: { shoppingCartId: shoppingCartId },
+    });
   }
 
   async findUnique(id: number): Promise<ShoppingCartItems> {
@@ -78,7 +92,7 @@ export class ShoppingCartItemsService {
   async updateItem(
     updateCartItemDto: UpdateCartItemsDto,
   ): Promise<ShoppingCartItems | number> {
-    const cartItem = await this.findMany(
+    const cartItem = await this.findManyBookId(
       updateCartItemDto.shoppingCartId,
       updateCartItemDto.bookId,
     );

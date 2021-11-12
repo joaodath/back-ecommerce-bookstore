@@ -8,5 +8,5 @@ export class AddItemDto {
   quantity: number;
 
   @IsNumber()
-  shoppingCartId: number;
+  shoppingCartId?: number;
 }
