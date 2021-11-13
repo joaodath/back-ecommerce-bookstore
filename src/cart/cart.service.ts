@@ -47,7 +47,7 @@ export class ShoppingCartService {
     username: string,
     addItemDto: AddItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCartId = await this.db.user.findUnique({
+    const shoppingCartId = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
     addItemDto.shoppingCartId = shoppingCartId.id;
