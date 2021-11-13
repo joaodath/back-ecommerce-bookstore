@@ -32,6 +32,15 @@
     Se estiver válido, retorna o nome do usuário.
     Se estiver vencido, retorna erro de autenticação `Error 401: Unauthorized`.
 
+## Rotas de Carrinho
+
+> Ainda sem autenticação
+
+- Buscar os dados do carrinho: FALTA IMPLEMENTAR
+- Criar um novo carrinho: `/cart/` (POST)
+- Adicionar um novo item: `/cart/add` (POST)
+- Deletar um item: `/cart/item/:itemId` (DELETE)
+
 ## Autenticação
 
 Para adicionar autenticação nas rotas, use o Guard de autenticação da seguinte forma:
