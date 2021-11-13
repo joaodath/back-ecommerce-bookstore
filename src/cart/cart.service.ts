@@ -19,7 +19,7 @@ export class ShoppingCartService {
   async createCart(
     createCartDto: Prisma.ShoppingCartCreateInput,
   ): Promise<ShoppingCart> {
-    if (createCartDto.userId) {
+    if (createCartDto.username) {
       const newCart = await this.db.shoppingCart.create({
         data: {
           ...createCartDto,
