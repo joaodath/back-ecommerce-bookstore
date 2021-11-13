@@ -31,7 +31,7 @@ export class ShoppingCartService {
         data: {
           user: {
             connect: {
-              id: createCartDto.userId,
+              username: createCartDto.username,
             },
           },
         },
