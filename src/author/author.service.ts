@@ -1,26 +1,106 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { Authors, Books } from '.prisma/client';
+import { AddBookAuthorDto } from './dto/add-book-author.dto';
+import { RemoveBookAuthorDto } from './dto/remove-book-author.dto';
 
 @Injectable()
 export class AuthorService {
-  create(createAuthorDto: CreateAuthorDto) {
-    return 'This action adds a new author';
+  constructor(private db: PrismaService) {}
+
+  async create(createAuthorDto: CreateAuthorDto): Promise<Authors> {
+    return await this.db.authors.create({ data: createAuthorDto });
   }
 
-  findAll() {
-    return `This action returns all author`;
+  async findAll(): Promise<Authors[]> {
+    const allAuthors = await this.db.authors.findMany();
+    if (allAuthors) {
+      return allAuthors;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} author`;
+  async findUnique(id: number): Promise<Authors> {
+    const author = await this.db.authors.findUnique({ where: { id } });
+    if (author) {
+      return author;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  update(id: number, updateAuthorDto: UpdateAuthorDto) {
-    return `This action updates a #${id} author`;
+  async findByName(name: string): Promise<Authors[]> {
+    const author = await this.db.authors.findMany({ where: { name } });
+    if (author) {
+      return author;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} author`;
+  async update(id: number, updateAuthorDto: UpdateAuthorDto): Promise<Authors> {
+    const author = await this.db.authors.findUnique({ where: { id } });
+    if (author) {
+      return await this.db.authors.update({
+        where: { id },
+        data: updateAuthorDto,
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async remove(id: number): Promise<Authors> {
+    const author = await this.db.authors.findUnique({ where: { id } });
+    if (author) {
+      return await this.db.authors.delete({ where: { id } });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async addBook(addBook: AddBookAuthorDto): Promise<boolean> {
+    const author = await this.db.authors.findUnique({
+      where: { id: addBook.authorId },
+    });
+    if (author) {
+      await this.db.books.update({
+        where: { id: addBook.bookId },
+        data: {
+          author: {
+            connect: {
+              id: addBook.authorId,
+            },
+          },
+        },
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async removeBook(removeBook: RemoveBookAuthorDto): Promise<Books> {
+    await this.db.books.update({
+      where: { id: removeBook.bookId },
+      data: {
+        author: {
+          disconnect: {
+            id: removeBook.authorId,
+          },
+        },
+      },
+    });
+    return await this.db.books.findUnique({
+      where: { id: removeBook.bookId },
+      include: {
+        author: true,
+        publisher: true,
+        category: true,
+      },
+    });
   }
 }

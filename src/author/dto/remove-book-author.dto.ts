@@ -5,5 +5,5 @@ export class RemoveBookAuthorDto {
   bookId: number;
 
   @IsNumber()
-  categoryId: number;
+  authorId: number;
 }

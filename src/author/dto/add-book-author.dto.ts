@@ -5,5 +5,5 @@ export class AddBookAuthorDto {
   bookId: number;
 
   @IsNumber()
-  categoryId: number;
+  authorId: number;
 }
