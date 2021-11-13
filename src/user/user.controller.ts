@@ -9,11 +9,13 @@ import {
   UsePipes,
   ValidationPipe,
   ParseIntPipe,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { Prisma, User } from '.prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { userWithoutPasswordDto } from './dto/user-without-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -37,10 +39,11 @@ export class UserController {
     return await this.userService.findUnique(id);
   }
 
-  @Get(':username')
+  @Get()
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async findByUsername(@Param('username') username: string): Promise<User> {
-    return await this.userService.findByUsername(username);
+  async findByUsername(@Request() req): Promise<userWithoutPasswordDto> {
+    return await this.userService.findByUsername(req.user.username);
   }
 
   @Patch(':id')
@@ -50,6 +53,18 @@ export class UserController {
     @Body() updateUserDto: Prisma.UserUpdateInput,
   ): Promise<User> {
     return await this.userService.update(id, updateUserDto);
+  }
+
+  @Patch('disable/:username')
+  @UsePipes(ValidationPipe)
+  async disable(@Param('username') username: string): Promise<User> {
+    return await this.userService.disable(username);
+  }
+
+  @Patch('/softdelete/:username')
+  @UsePipes(ValidationPipe)
+  async softDelete(@Param('username') username: string): Promise<User> {
+    return await this.userService.softDelete(username);
   }
 
   @Delete(':id')
