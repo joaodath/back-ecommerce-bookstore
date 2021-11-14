@@ -36,14 +36,15 @@ model User {
 model ShoppingCart {
   id                Int                 @id @default(autoincrement())
   user              User[]              @relation(fields: [username], references: [username])
-  username            String? @unique
+  username          String?             @unique
   shoppingCartItems ShoppingCartItems[]
   couponCode        CouponCodes[]       @relation(fields: [couponCodeId], references: [code])
   couponCodeId      String?
   discountAmount    Float?
   shippingPrice     Float?
   totalPrice        Float?
-  isAnonymous Boolean @default(true)
+  isAnonymous       Boolean             @default(true)
+  createdAt         DateTime            @default(now())
 }
 
 model ShoppingCartItems {
@@ -52,8 +53,8 @@ model ShoppingCartItems {
   shoppingCartId Int?
   book           Books[]
   price          Float
-  quantity Int
-  totalPrice Float
+  quantity       Int
+  totalPrice     Float
 }
 
 model CouponCodes {
@@ -119,7 +120,7 @@ model Category {
 model ShoppingHistory {
   id             Int                   @id @default(autoincrement())
   user           User[]                @relation(fields: [username], references: [username])
-  username         String? @unique
+  username       String?               @unique
   items          ShoppingHistoryItem[]
   totalPrice     Float
   couponCode     CouponCodes[]         @relation(fields: [couponCodeId], references: [code])
