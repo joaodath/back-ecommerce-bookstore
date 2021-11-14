@@ -1,5 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { AuthorService } from './author.service';
+import { Authors } from '.prisma/client';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 
@@ -7,28 +19,42 @@ import { UpdateAuthorDto } from './dto/update-author.dto';
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
-  @Post()
-  create(@Body() createAuthorDto: CreateAuthorDto) {
-    return this.authorService.create(createAuthorDto);
+  @Post('new')
+  @UsePipes(ValidationPipe)
+  async create(@Body() createAuthorDto: CreateAuthorDto): Promise<Authors> {
+    return await this.authorService.create(createAuthorDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authorService.findAll();
+  @Get('all')
+  @UsePipes(ValidationPipe)
+  async findAll(): Promise<Authors[]> {
+    return await this.authorService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authorService.findOne(+id);
+  @Get('/id/:id')
+  @UsePipes(ValidationPipe)
+  async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
+    return await this.authorService.findUnique(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorDto) {
-    return this.authorService.update(+id, updateAuthorDto);
+  @Get('/name/:name')
+  @UsePipes(ValidationPipe)
+  async findName(@Param('name') name: string): Promise<Authors[]> {
+    return await this.authorService.findByName(name);
+  }
+
+  @Patch('/update/:id')
+  @UsePipes(ValidationPipe)
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateAuthorDto: UpdateAuthorDto,
+  ): Promise<Authors> {
+    return await this.authorService.update(id, updateAuthorDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authorService.remove(+id);
+  @UsePipes(ValidationPipe)
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
+    return await this.authorService.remove(id);
   }
 }
