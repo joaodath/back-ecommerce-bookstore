@@ -12,6 +12,7 @@ import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from 'src/cart-items/dto/update-cart-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
+import { DeleteItemDto } from './dto/delete-item.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -238,7 +239,7 @@ export class ShoppingCartService {
     });
   }
 
-  async deleteItem(
+  async deleteItemUser(
     username: string,
     bookId: number,
   ): Promise<ShoppingCartItems> {
@@ -255,6 +256,28 @@ export class ShoppingCartService {
       throw new NotFoundException();
     } else {
       return await this.cartItems.removeItem(bookId);
+    }
+  }
+
+  async deleteItemAnon(
+    deleteItemDto: DeleteItemDto,
+  ): Promise<ShoppingCartItems> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { id: deleteItemDto.shoppingCartId },
+    });
+    if (shoppingCart.isAnonymous === true) {
+      const cartItem = await this.cartItems.findManyBookId(
+        deleteItemDto.shoppingCartId,
+        deleteItemDto.bookId,
+      );
+
+      if (cartItem === -1) {
+        throw new NotFoundException();
+      } else {
+        return await this.cartItems.removeItem(deleteItemDto.bookId);
+      }
+    } else {
+      throw new ConflictException();
     }
   }
 }
