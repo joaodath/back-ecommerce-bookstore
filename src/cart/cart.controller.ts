@@ -17,6 +17,7 @@ import { AddItemDto } from './dto/add-item.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { DeleteItemDto } from './dto/delete-item.dto';
 
 @Controller('cart')
 export class CartController {
@@ -86,12 +87,24 @@ export class CartController {
     return await this.cartService.updateItemAnon(updateItemDto);
   }
 
-  @Delete('item/:id')
+  @Delete('user/item/delete')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async deleteItem(
+  async deleteItemUser(
     @Request() req,
-    @Param('id', ParseIntPipe) id: number,
+    @Body() deleteItemDto: DeleteItemDto,
   ): Promise<ShoppingCartItems> {
-    return await this.cartService.deleteItem(req.user.username, id);
+    return await this.cartService.deleteItemUser(
+      req.user.username,
+      deleteItemDto,
+    );
+  }
+
+  @Delete('anon/item/delete')
+  @UsePipes(ValidationPipe)
+  async deleteItemAnon(
+    @Body() deleteItemDto: DeleteItemDto,
+  ): Promise<ShoppingCartItems> {
+    return await this.cartService.deleteItemAnon(deleteItemDto);
   }
 }
