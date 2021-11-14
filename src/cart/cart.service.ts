@@ -145,7 +145,7 @@ export class ShoppingCartService {
     const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { id: addItemDto.shoppingCartId },
     });
-    if (shoppingCart.isAnonymous) {
+    if (shoppingCart.isAnonymous === true) {
       const cartItem = await this.cartItems.findManyBookId(
         addItemDto.shoppingCartId,
         addItemDto.bookId,
