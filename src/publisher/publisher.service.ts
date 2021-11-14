@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdatePublisherDto } from './dto/update-publisher.dto';
+import { Publisher, Books } from '.prisma/client';
+import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
+import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 
 @Injectable()
 export class PublisherService {
-  create(createPublisherDto: CreatePublisherDto) {
-    return 'This action adds a new publisher';
+  constructor(private db: PrismaService) {}
+
+  async create(createPublisherDto: CreatePublisherDto): Promise<Publisher> {
+    return await this.db.publisher.create({ data: createPublisherDto });
   }
 
-  findAll() {
-    return `This action returns all publisher`;
+  async findAll(): Promise<Publisher[]> {
+    const allPublishers = await this.db.publisher.findMany();
+    if (allPublishers) {
+      return allPublishers;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} publisher`;
+  async findUnique(id: number): Promise<Publisher> {
+    const publisher = await this.db.publisher.findUnique({ where: { id } });
+    if (publisher) {
+      return publisher;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  update(id: number, updatePublisherDto: UpdatePublisherDto) {
-    return `This action updates a #${id} publisher`;
+  async findByName(name: string): Promise<Publisher[]> {
+    const publisher = await this.db.publisher.findMany({ where: { name } });
+    if (publisher) {
+      return publisher;
+    } else {
+      throw new NotFoundException();
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} publisher`;
+  async update(
+    id: number,
+    updatePublisherDto: UpdatePublisherDto,
+  ): Promise<Publisher> {
+    const publisher = await this.db.publisher.findUnique({ where: { id } });
+    if (publisher) {
+      return await this.db.publisher.update({
+        where: { id },
+        data: updatePublisherDto,
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async remove(id: number): Promise<Publisher> {
+    const publisher = await this.db.publisher.findUnique({ where: { id } });
+    if (publisher) {
+      return await this.db.publisher.delete({ where: { id } });
+    } else {
+      throw new NotFoundException();
+    }
   }
 }
