@@ -7,6 +7,7 @@ import { AddItemDto } from './dto/add-item.dto';
 import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from 'src/cart-items/dto/update-cart-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { CreateUserCartDto } from './dto/create-user-cart.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -16,13 +17,66 @@ export class ShoppingCartService {
     private book: BooksService,
   ) {}
 
-  async createCart(
-    createCartDto: Prisma.ShoppingCartCreateInput,
+  // async createCart(
+  //   createCartDto: Prisma.ShoppingCartCreateInput,
+  // ): Promise<ShoppingCart> {
+  //   if (createCartDto.username) {
+  //     const newCart = await this.db.shoppingCart.create({
+  //       data: {
+  //         ...createCartDto,
+  //         isAnonymous: false,
+  //       },
+  //     });
+  //     return await this.db.shoppingCart.update({
+  //       where: { id: newCart.id },
+  //       data: {
+  //         user: {
+  //           connect: {
+  //             username: createCartDto.username,
+  //           },
+  //         },
+  //       },
+  //     });
+  //   } else {
+  //     return await this.db.shoppingCart.create({
+  //       data: { ...createCartDto, isAnonymous: true },
+  //     });
+  //   }
+  // }
+
+  async createAnonCart(): Promise<ShoppingCart> {
+    const newCart = await this.db.shoppingCart.create({
+      data: {
+        isAnonymous: true,
+      },
+    });
+    return newCart;
+  }
+
+  async createUserCart(
+    username: string,
+    createUserCartDto?: CreateUserCartDto,
   ): Promise<ShoppingCart> {
-    if (createCartDto.username) {
+    const isThereACart = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    if (isThereACart) {
+      if (createUserCartDto.cartId) {
+        const cartItems = await this.cartItems.findMany(
+          createUserCartDto.cartId,
+        );
+        for (const singleCartItem of cartItems) {
+          await this.cartItems.connectNewOwner(
+            singleCartItem.id,
+            isThereACart.id,
+          );
+        }
+      } else {
+        return isThereACart;
+      }
+    } else {
       const newCart = await this.db.shoppingCart.create({
         data: {
-          ...createCartDto,
           isAnonymous: false,
         },
       });
@@ -31,19 +85,18 @@ export class ShoppingCartService {
         data: {
           user: {
             connect: {
-              username: createCartDto.username,
+              username: username,
             },
           },
         },
-      });
-    } else {
-      return await this.db.shoppingCart.create({
-        data: { ...createCartDto, isAnonymous: true },
+        include: {
+          shoppingCartItems: true,
+        },
       });
     }
   }
 
-  async addItem(
+  async addItemUser(
     username: string,
     addItemDto: AddItemDto,
   ): Promise<ShoppingCart> {
