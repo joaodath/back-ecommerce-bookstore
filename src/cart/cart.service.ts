@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
@@ -176,7 +180,14 @@ export class ShoppingCartService {
     }
   }
 
-  async updateItem(updateItemDto: UpdateItemDto): Promise<ShoppingCart> {
+  async updateItemUser(
+    username: string,
+    updateItemDto: UpdateItemDto,
+  ): Promise<ShoppingCart> {
+    const shoppingCartId = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    updateItemDto.shoppingCartId = shoppingCartId.id;
     const cartItem = await this.cartItems.findUnique(
       updateItemDto.shoppingCartItemId,
     );
@@ -185,6 +196,25 @@ export class ShoppingCartService {
       return await this.findUnique(updateItemDto.shoppingCartId);
     } else {
       throw new NotFoundException();
+    }
+  }
+
+  async updateItemAnon(updateItemDto: UpdateItemDto): Promise<ShoppingCart> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { id: updateItemDto.shoppingCartId },
+    });
+    if (shoppingCart.isAnonymous === true) {
+      const cartItem = await this.cartItems.findUnique(
+        updateItemDto.shoppingCartItemId,
+      );
+      if (cartItem) {
+        const updateItem = await this.cartItems.updateItem(updateItemDto);
+        return await this.findUnique(updateItemDto.shoppingCartId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new ConflictException();
     }
   }
 
