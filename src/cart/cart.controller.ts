@@ -1,5 +1,6 @@
 import {
   Controller,
+  Get,
   Post,
   Body,
   Param,
@@ -18,6 +19,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
+import { GetCartDto } from './dto/get-cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -30,6 +32,19 @@ export class CartController {
   // ): Promise<ShoppingCart> {
   //   return await this.cartService.createCart(createCartDto);
   // }
+
+  @Get('user')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async getCartUser(@Request() req): Promise<ShoppingCart> {
+    return await this.cartService.getCartUser(req.user.username);
+  }
+
+  @Post('anon')
+  @UsePipes(ValidationPipe)
+  async getCartAnon(@Body() getCartDto: GetCartDto): Promise<ShoppingCart> {
+    return await this.cartService.getCartAnon(getCartDto);
+  }
 
   @Post('new/anon')
   @UsePipes(ValidationPipe)
