@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
@@ -133,6 +133,46 @@ export class ShoppingCartService {
       };
       const cartUpdate = await this.cartItems.updateItem(updateCartItem);
       return await this.findUnique(addItemDto.shoppingCartId);
+    }
+  }
+
+  async addItemAnon(addItemDto: AddItemDto): Promise<ShoppingCart> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { id: addItemDto.shoppingCartId },
+    });
+    if (shoppingCart.isAnonymous) {
+      const cartItem = await this.cartItems.findManyBookId(
+        addItemDto.shoppingCartId,
+        addItemDto.bookId,
+      );
+      if (cartItem === -1) {
+        const bookObject = await this.book.findUnique(addItemDto.bookId);
+        const bookPrice =
+          bookObject.discountCheck === true
+            ? bookObject.discountedPrice
+            : bookObject.price;
+        const createCartItemsDto: CreateCartItemsDto = {
+          shoppingCartId: addItemDto.shoppingCartId,
+          bookId: addItemDto.bookId,
+          price: bookPrice,
+          quantity: addItemDto.quantity,
+        };
+        await this.cartItems.createItem(createCartItemsDto, addItemDto.bookId);
+        return this.db.shoppingCart.findUnique({
+          where: { id: addItemDto.shoppingCartId },
+          include: { shoppingCartItems: true },
+        });
+      } else {
+        const updateCartItem: UpdateCartItemsDto = {
+          shoppingCartId: addItemDto.shoppingCartId,
+          bookId: addItemDto.bookId,
+          quantity: addItemDto.quantity,
+        };
+        const cartUpdate = await this.cartItems.updateItem(updateCartItem);
+        return await this.findUnique(addItemDto.shoppingCartId);
+      }
+    } else {
+      throw new ConflictException();
     }
   }
 
