@@ -22,6 +22,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post('new')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
