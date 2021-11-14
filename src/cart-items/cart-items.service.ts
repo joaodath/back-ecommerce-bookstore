@@ -136,6 +136,37 @@ export class ShoppingCartItemsService {
     });
   }
 
+  async connectNewOwner(
+    cartItemId: number,
+    newShoppingCartId: number,
+  ): Promise<ShoppingCartItems> {
+    const oldShoppingCart = await this.db.shoppingCartItems.findUnique({
+      where: {
+        id: cartItemId,
+      },
+    });
+    await this.db.shoppingCartItems.update({
+      where: { id: cartItemId },
+      data: {
+        shoppingCart: {
+          disconnect: {
+            id: oldShoppingCart.id,
+          },
+        },
+      },
+    });
+    return await this.db.shoppingCartItems.update({
+      where: { id: cartItemId },
+      data: {
+        shoppingCart: {
+          connect: {
+            id: newShoppingCartId,
+          },
+        },
+      },
+    });
+  }
+
   async removeItem(id: number): Promise<ShoppingCartItems> {
     return await this.db.shoppingCartItems.delete({ where: { id } });
   }
