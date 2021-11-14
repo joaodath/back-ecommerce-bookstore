@@ -1,18 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ShoppingCartService } from 'src/cart/cart.service';
 import { BooksService } from 'src/books/books.service';
 import { CreateCartItemsDto } from './dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
-  constructor(
-    private db: PrismaService,
-    private cart: ShoppingCartService,
-    private book: BooksService,
-  ) {}
+  constructor(private db: PrismaService, private book: BooksService) {}
 
   async createItem(
     createCartItemDto: CreateCartItemsDto,
