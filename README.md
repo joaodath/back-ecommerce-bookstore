@@ -18,11 +18,12 @@
 
 > Ainda sem autenticação.
 
-- Criar Livro: `/books/new`
-- Encontrar um Livro por ID: `/books/id/:id`
-- Encontrar um Livro pelo Title: `/books/:title`
-- Editar informações do Livro (Patch): `/books/:id`
-- Deletar Livro: `/books/:id`
+- Criar Livro: `/books/new` (POST)
+- Encontrar um Livro por `ID`: `/books/id/:id` (GET)
+- Encontrar todos os Livros: `/books/all` (GET)
+- Encontrar um Livro pelo Title: `/books/:title` (GET)
+- Editar informações do Livro: `/books/:id` (PATCH)
+- Deletar Livro: `/books/:id` (DELETE)
 
 ### Rotas de Autenticação
 
@@ -31,6 +32,59 @@
 - - Envie o token JWT no cabeçalho da requisição normalmente.
     Se estiver válido, retorna o nome do usuário.
     Se estiver vencido, retorna erro de autenticação `Error 401: Unauthorized`.
+
+### Rotas de ShoppingHistory
+
+> Ainda sem autenticação.
+
+- Criar ShoppingHistory: `/shopping-history/new` (POST)
+- Encontrar um Livro por `ID`: `/shopping-history/id/:id` (GET)
+- Encontrar todos os ShoppingHistory: `/shopping-history/all` (GET)
+- Editar informações do ShoppingHistory: `/shopping-history/:id` (PATCH)
+- Deletar Livro: `/shopping-history/:id` (DELETE)
+
+### Rotas de CouponCodes
+
+> Ainda sem autenticação.
+
+- Criar CouponCode: `/coupon-codes/new` (POST)
+- Encontrar um CouponCode por `ID`: `/coupon-codes/:code/code` (GET)
+- Encontrar todos os CouponCode: `/coupon-codes/all` (GET)
+- Editar informações do CouponCode: `/coupon-codes/:code` (PATCH)
+- Deletar CouponCode: `/coupon-codes/:code` (DELETE)
+
+### Rotas de Category
+
+> Ainda sem autenticação.
+
+- Criar Category: `/category/new` (POST)
+- Encontrar um Category por `ID`: `/category/id/:id` (GET)
+- Encontrar um Category pelo Name: `/category/:name` (GET)
+- Encontrar todos os Category: `/category/all` (GET)
+- Editar informações do Category: `/category/update/:id` (PATCH)
+- Deletar Category: `/category/:id` (DELETE)
+
+### Rotas de Author
+
+> Ainda sem autenticação.
+
+- Criar Author: `/author/new` (POST)
+- Encontrar um Author por `ID`: `/author/id/:id` (GET)
+- Encontrar um Author pelo Name: `/author/:name` (GET)
+- Encontrar todos os Author: `/author/all` (GET)
+- Editar informações do Author: `/author/update/:id` (PATCH)
+- Deletar Author: `/author/:id` (DELETE)
+
+### Rotas de Publisher
+
+> Ainda sem autenticação.
+
+- Criar Publisher: `/publisher/new` (POST)
+- Encontrar um Publisher por `ID`: `/publisher/id/:id` (GET)
+- Encontrar um Publisher pelo Name: `/publisher/:name` (GET)
+- Encontrar todos os Publisher: `/publisher/all` (GET)
+- Editar informações do Publisher: `/publisher/update/:id` (PATCH)
+- Deletar Publisher: `/publisher/:id` (DELETE)
 
 ## Autenticação
 
