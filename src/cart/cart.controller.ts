@@ -46,7 +46,7 @@ export class CartController {
     return await this.cartService.getCartAnon(getCartDto);
   }
 
-  @Post('new/anon')
+  @Get('new/anon')
   @UsePipes(ValidationPipe)
   async createAnonCart(): Promise<ShoppingCart> {
     return await this.cartService.createAnonCart();
