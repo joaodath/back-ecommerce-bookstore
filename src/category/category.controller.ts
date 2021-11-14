@@ -49,6 +49,7 @@ export class CategoryController {
   }
 
   @Patch('/update/:id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
