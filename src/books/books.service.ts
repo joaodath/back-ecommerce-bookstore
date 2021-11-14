@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Books } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PublisherService } from 'src/publisher/publisher.service';
+import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 
 @Injectable()
 export class BooksService {
-  constructor(private db: PrismaService) {}
+  constructor(private db: PrismaService, private publisher: PublisherService) {}
 
   async create(createBookDto: Prisma.BooksCreateInput): Promise<Books> {
     return await this.db.books.create({ data: createBookDto });
@@ -15,7 +17,14 @@ export class BooksService {
   }
 
   async findUnique(id: number): Promise<Books> {
-    return await this.db.books.findUnique({ where: { id } });
+    return await this.db.books.findUnique({
+      where: { id: id },
+      include: {
+        author: true,
+        publisher: true,
+        category: true,
+      },
+    });
   }
 
   async findByTitle(title: string): Promise<Books[]> {
@@ -31,5 +40,21 @@ export class BooksService {
 
   async remove(id: number): Promise<Books> {
     return await this.db.books.delete({ where: { id } });
+  }
+
+  async addPublisher(addPublisher: AddBookPublisherDto): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: addPublisher.bookId },
+    });
+    if (book) {
+      const publisher = await this.publisher.addBook(addPublisher);
+      if (publisher) {
+        return await this.findUnique(addPublisher.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
   }
 }
