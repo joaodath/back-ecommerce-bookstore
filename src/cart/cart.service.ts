@@ -13,6 +13,7 @@ import { UpdateCartItemsDto } from 'src/cart-items/dto/update-cart-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
+import { GetCartDto } from './dto/get-cart.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -98,6 +99,76 @@ export class ShoppingCartService {
           shoppingCartItems: true,
         },
       });
+    }
+  }
+
+  async getCartUser(username: string): Promise<ShoppingCart> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: {
+        username: username,
+      },
+      include: {
+        shoppingCartItems: {
+          include: {
+            book: {
+              select: {
+                title: true,
+                author: true,
+                publisher: true,
+                coverImg: true,
+              },
+            },
+          },
+        },
+        couponCode: {
+          select: {
+            code: true,
+            discountAmount: true,
+          },
+        },
+      },
+    });
+    if (shoppingCart) {
+      return shoppingCart;
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async getCartAnon(getCartDto: GetCartDto): Promise<ShoppingCart> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: {
+        id: getCartDto.shoppingCartId,
+      },
+      include: {
+        shoppingCartItems: {
+          include: {
+            book: {
+              select: {
+                title: true,
+                author: true,
+                publisher: true,
+                coverImg: true,
+              },
+            },
+          },
+        },
+        couponCode: {
+          select: {
+            code: true,
+            discountAmount: true,
+          },
+        },
+      },
+    });
+    if (shoppingCart) {
+      if (shoppingCart.isAnonymous === true) {
+        return shoppingCart;
+      } else {
+        throw new ConflictException();
+      }
+    } else {
+      throw new NotFoundException();
     }
   }
 
