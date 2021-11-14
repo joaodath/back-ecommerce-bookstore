@@ -14,5 +14,6 @@ import { ShoppingCartService } from 'src/cart/cart.service';
     BooksService,
     ShoppingCartService,
   ],
+  exports: [ShoppingCartItemsService],
 })
 export class CartItemsModule {}
