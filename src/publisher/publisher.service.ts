@@ -64,4 +64,46 @@ export class PublisherService {
       throw new NotFoundException();
     }
   }
+
+  async addBook(addBook: AddBookPublisherDto): Promise<boolean> {
+    const publisher = await this.db.publisher.findUnique({
+      where: { id: addBook.publisherId },
+    });
+    if (publisher) {
+      await this.db.books.update({
+        where: { id: addBook.bookId },
+        data: {
+          publisher: {
+            connect: {
+              id: addBook.publisherId,
+            },
+          },
+        },
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async removeBook(removeBook: RemoveBookPublisherDto): Promise<Books> {
+    await this.db.books.update({
+      where: { id: removeBook.bookId },
+      data: {
+        publisher: {
+          disconnect: {
+            id: removeBook.publisherId,
+          },
+        },
+      },
+    });
+    return await this.db.books.findUnique({
+      where: { id: removeBook.bookId },
+      include: {
+        author: true,
+        publisher: true,
+        category: true,
+      },
+    });
+  }
 }
