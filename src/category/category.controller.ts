@@ -14,6 +14,7 @@ import { CategoryService } from './category.service';
 import { Category } from '.prisma/client';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('category')
 export class CategoryController {
