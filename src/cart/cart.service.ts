@@ -241,21 +241,21 @@ export class ShoppingCartService {
 
   async deleteItemUser(
     username: string,
-    bookId: number,
+    deleteItemDto: DeleteItemDto,
   ): Promise<ShoppingCartItems> {
     const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
-    const shoppingCartId = shoppingCart.id;
+    deleteItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.cartItems.findManyBookId(
-      shoppingCartId,
-      bookId,
+      deleteItemDto.shoppingCartId,
+      deleteItemDto.bookId,
     );
 
     if (cartItem === -1) {
       throw new NotFoundException();
     } else {
-      return await this.cartItems.removeItem(bookId);
+      return await this.cartItems.removeItem(deleteItemDto.bookId);
     }
   }
 
