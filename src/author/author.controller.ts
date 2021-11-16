@@ -45,6 +45,7 @@ export class AuthorController {
   }
 
   @Patch('/update/:id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
