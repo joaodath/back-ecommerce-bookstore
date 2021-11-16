@@ -3,6 +3,7 @@ import { Prisma, Books } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthorService } from 'src/author/author.service';
 import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
+import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 
 @Injectable()
 export class BooksService {
