@@ -104,7 +104,6 @@ export class AuthorService {
     }
   }
         author: {
-          disconnect: {
             id: removeBook.authorId,
           },
         },
