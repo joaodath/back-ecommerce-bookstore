@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { CartItemsModule } from './cart-items/cart-items.module';
+import { CartModule } from './cart/cart.module';
 import { BooksModule } from './books/books.module';
 import { ShoppingHistoryModule } from './shopping-history/shopping-history.module';
 import { PublisherModule } from './publisher/publisher.module';
@@ -25,6 +27,8 @@ import { AuthorModule } from './author/author.module';
     PublisherModule,
     CategoryModule,
     AuthorModule,
+    CartItemsModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

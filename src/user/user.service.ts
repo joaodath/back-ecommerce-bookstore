@@ -48,13 +48,13 @@ export class UserService {
     return await this.db.user.findMany();
   }
 
-  async findUnique(id: number): Promise<User> {
-    const user = await this.db.user.findUnique({ where: { id } });
-    if (!user) {
-      throw new NotFoundException();
-    }
-    return user;
-  }
+  // async findUnique(id: number): Promise<User> {
+  //   const user = await this.db.user.findUnique({ where: { id } });
+  //   if (!user) {
+  //     throw new NotFoundException();
+  //   }
+  //   return user;
+  // }
 
   async findByUsername(username: string): Promise<userWithoutPasswordDto> {
     const user = await this.db.user.findUnique({
@@ -73,14 +73,17 @@ export class UserService {
   }
 
   async update(
-    id: number,
+    username: string,
     updateUserDto: Prisma.UserUpdateInput,
   ): Promise<User> {
-    return await this.db.user.update({ where: { id }, data: updateUserDto });
+    return await this.db.user.update({
+      where: { username: username },
+      data: updateUserDto,
+    });
   }
 
-  async remove(id: number): Promise<User> {
-    return await this.db.user.delete({ where: { id } });
+  async remove(username: string): Promise<User> {
+    return await this.db.user.delete({ where: { username: username } });
   }
 
   async softDelete(username: string): Promise<User> {

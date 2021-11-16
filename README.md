@@ -85,6 +85,27 @@
 - Encontrar todos os Publisher: `/publisher/all` (GET)
 - Editar informações do Publisher: `/publisher/update/:id` (PATCH)
 - Deletar Publisher: `/publisher/:id` (DELETE)
+## Rotas de Carrinho
+
+- **Buscar os dados do carrinho:**
+- - Carrinho Anônimo: `/cart/anon` (POST) passando o `GetCartDto`
+- - Carrinho de Usuário: `/cart/user` (GET) passando somente o token JWT
+
+- **Criar um novo carrinho:**
+- - Carrinho Anônimo: `/cart/new/anon` (GET) sem passar nada
+- - Carrinho de Usuário: `/cart/new/user` (POST) passando o token JWT e um `CreateUserCartDto` vazio se for um carrinho novo ou com a id de um carrinho anônimo (quando o usuário adiciona itens ao carrinho e depois faz login)
+
+- **Adicionar um novo item:**
+- - Carrinho Anônimo: `/cart/anon/item/add` (POST) passando um `AddItemDto`
+- - Carrinho de Usuário: `/cart/user/item/add` (POST) passando o token JWT e um `AddItemDto`
+
+- **Atualizar um Item:**
+- - Carrinho Anônimo: `/cart/anon/item/update` (POST) passando um `UpdateItemDto`
+- - Carrinho de Usuário: `/cart/user/item/update` (POST) passando o token JWT e um `UpdateItemDto`
+
+- **Deletar um item:**
+- - Carrinho Anônimo: `/cart/anon/item/delete` (DELETE) passando um `DeleteItemDto`
+- - Carrinho de Usuário: `/cart/user/item/delete` (DELETE) passando o token JWT e um `DeleteItemDto`
 
 ## Autenticação
 
