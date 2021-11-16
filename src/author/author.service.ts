@@ -103,7 +103,6 @@ export class AuthorService {
       return false;
     }
   }
-          },
         },
     });
     return await this.db.books.findUnique({
