@@ -3,6 +3,7 @@ import { Prisma, Books } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PublisherService } from 'src/publisher/publisher.service';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
+import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 
 @Injectable()
 export class BooksService {
@@ -50,6 +51,24 @@ export class BooksService {
       const publisher = await this.publisher.addBook(addPublisher);
       if (publisher) {
         return await this.findUnique(addPublisher.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async removePublisher(
+    removePublisher: RemoveBookPublisherDto,
+  ): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: removePublisher.bookId },
+    });
+    if (book) {
+      const publisher = await this.publisher.removeBook(removePublisher);
+      if (publisher) {
+        return await this.findUnique(removePublisher.bookId);
       } else {
         throw new NotFoundException();
       }
