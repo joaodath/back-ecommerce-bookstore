@@ -100,5 +100,4 @@ export class CategoryService {
       include: {
         author: true,
         publisher: true,
-  }
 }
