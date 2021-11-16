@@ -14,6 +14,7 @@ import { AuthorService } from './author.service';
 import { Authors } from '.prisma/client';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('author')
 export class AuthorController {
