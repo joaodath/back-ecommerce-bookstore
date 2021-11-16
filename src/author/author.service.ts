@@ -103,7 +103,6 @@ export class AuthorService {
       return false;
     }
   }
-    await this.db.books.update({
       where: { id: removeBook.bookId },
       data: {
         author: {
