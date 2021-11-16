@@ -83,7 +83,26 @@ export class AuthorService {
     }
   }
 
-  async removeBook(removeBook: RemoveBookAuthorDto): Promise<Books> {
+  async removeBook2(removeBook: RemoveBookAuthorDto): Promise<boolean> {
+    const author = await this.db.authors.findUnique({
+      where: { id: removeBook.authorId },
+    });
+    if (author) {
+      await this.db.books.update({
+        where: { id: removeBook.bookId },
+        data: {
+          author: {
+            disconnect: {
+              id: removeBook.authorId,
+            },
+          },
+        },
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
     await this.db.books.update({
       where: { id: removeBook.bookId },
       data: {
