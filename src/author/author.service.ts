@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
-import { Authors, Books } from '.prisma/client';
+import { Authors } from '.prisma/client';
 import { AddBookAuthorDto } from './dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from './dto/remove-book-author.dto';
 
@@ -96,13 +96,11 @@ export class AuthorService {
               id: removeBook.authorId,
             },
           },
+        },
       });
       return true;
     } else {
       return false;
     }
   }
-        },
-      },
-    });
 }

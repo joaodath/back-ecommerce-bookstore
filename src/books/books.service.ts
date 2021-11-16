@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Books } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PublisherService } from 'src/publisher/publisher.service';
+import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
+import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 import { CategoryService } from 'src/category/category.service';
 import { AddBookCategoryDto } from 'src/category/dto/add-book-category.dto';
 import { AuthorService } from 'src/author/author.service';
 import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
+import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
 
 @Injectable()
 export class BooksService {
@@ -13,6 +17,7 @@ export class BooksService {
     private db: PrismaService,
     private author: AuthorService,
     private category: CategoryService,
+    private publisher: PublisherService,
   ) {}
 
   async create(createBookDto: Prisma.BooksCreateInput): Promise<Books> {
@@ -49,22 +54,6 @@ export class BooksService {
     return await this.db.books.delete({ where: { id } });
   }
 
-  async addAuthor(addAuthor: AddBookAuthorDto): Promise<Books> {
-    const book = await this.db.books.findUnique({
-      where: { id: addAuthor.bookId },
-    });
-    if (book) {
-      const author = await this.author.addBook(addAuthor);
-      if (author) {
-        return await this.findUnique(addAuthor.bookId);
-      } else {
-        throw new NotFoundException();
-      }
-    } else {
-      throw new NotFoundException();
-    }
-  }
-
   async addCategory(addCategory: AddBookCategoryDto): Promise<Books> {
     const book = await this.db.books.findUnique({
       where: { id: addCategory.bookId },
@@ -81,6 +70,38 @@ export class BooksService {
     }
   }
 
+  async removeCategory(removeCategory: RemoveBookCategoryDto): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: removeCategory.bookId },
+    });
+    if (book) {
+      const category = await this.category.removeBook(removeCategory);
+      if (category) {
+        return await this.findUnique(removeCategory.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async addAuthor(addAuthor: AddBookAuthorDto): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: addAuthor.bookId },
+    });
+    if (book) {
+      const author = await this.author.addBook(addAuthor);
+      if (author) {
+        return await this.findUnique(addAuthor.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
   async removeAuthor(removeAuthor: RemoveBookAuthorDto): Promise<Books> {
     const book = await this.db.books.findUnique({
       where: { id: removeAuthor.bookId },
@@ -89,6 +110,40 @@ export class BooksService {
       const author = await this.author.removeBook(removeAuthor);
       if (author) {
         return await this.findUnique(removeAuthor.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async addPublisher(addPublisher: AddBookPublisherDto): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: addPublisher.bookId },
+    });
+    if (book) {
+      const publisher = await this.publisher.addBook(addPublisher);
+      if (publisher) {
+        return await this.findUnique(addPublisher.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async removePublisher(
+    removePublisher: RemoveBookPublisherDto,
+  ): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: removePublisher.bookId },
+    });
+    if (book) {
+      const publisher = await this.publisher.removeBook(removePublisher);
+      if (publisher) {
+        return await this.findUnique(removePublisher.bookId);
       } else {
         throw new NotFoundException();
       }

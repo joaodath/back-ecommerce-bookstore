@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BooksModule } from './books/books.module';
 import { ShoppingHistoryModule } from './shopping-history/shopping-history.module';
+import { PublisherModule } from './publisher/publisher.module';
 import { CategoryModule } from './category/category.module';
 import { AuthorModule } from './author/author.module';
 
@@ -21,6 +22,7 @@ import { AuthorModule } from './author/author.module';
     AuthModule,
     BooksModule,
     ShoppingHistoryModule,
+    PublisherModule,
     CategoryModule,
     AuthorModule,
   ],

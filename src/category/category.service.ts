@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category, Books } from '.prisma/client';
+import { Category } from '.prisma/client';
 import { AddBookCategoryDto } from './dto/add-book-category.dto';
 import { RemoveBookCategoryDto } from './dto/remove-book-category.dto';
 
@@ -86,14 +86,24 @@ export class CategoryService {
     }
   }
 
-  async removeBook(removeBook: RemoveBookCategoryDto): Promise<Books> {
-      data: {
-        category: {
-            id: removeBook.categoryId,
+  async removeBook(removeBook: RemoveBookCategoryDto): Promise<boolean> {
+    const category = await this.db.category.findUnique({
+      where: { id: removeBook.categoryId },
+    });
+    if (category) {
+      await this.db.books.update({
+        where: { id: removeBook.bookId },
+        data: {
+          category: {
+            disconnect: {
+              id: removeBook.categoryId,
+            },
           },
         },
-      },
-    });
-    return await this.db.books.findUnique({
-      where: { id: removeBook.bookId },
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
