@@ -96,7 +96,6 @@ export class AuthorService {
               id: removeBook.authorId,
             },
           },
-        },
       });
       return true;
     } else {
