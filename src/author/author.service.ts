@@ -103,7 +103,6 @@ export class AuthorService {
     }
   }
         },
-      where: { id: removeBook.bookId },
         publisher: true,
         category: true,
       },
