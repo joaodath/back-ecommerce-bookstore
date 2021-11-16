@@ -104,7 +104,6 @@ export class AuthorService {
   }
         },
       where: { id: removeBook.bookId },
-        author: true,
         publisher: true,
         category: true,
       },
