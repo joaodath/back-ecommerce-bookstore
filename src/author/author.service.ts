@@ -108,7 +108,6 @@ export class AuthorService {
             id: removeBook.authorId,
           },
         },
-      },
     });
     return await this.db.books.findUnique({
       where: { id: removeBook.bookId },
