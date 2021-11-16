@@ -83,7 +83,7 @@ export class AuthorService {
     }
   }
 
-  async removeBook2(removeBook: RemoveBookAuthorDto): Promise<boolean> {
+  async removeBook(removeBook: RemoveBookAuthorDto): Promise<boolean> {
     const author = await this.db.authors.findUnique({
       where: { id: removeBook.authorId },
     });
