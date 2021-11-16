@@ -96,5 +96,4 @@ export class CategoryService {
     });
     return await this.db.books.findUnique({
       where: { id: removeBook.bookId },
-        publisher: true,
 }
