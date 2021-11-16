@@ -87,7 +87,6 @@ export class CategoryService {
   }
 
   async removeBook(removeBook: RemoveBookCategoryDto): Promise<Books> {
-    await this.db.books.update({
       where: { id: removeBook.bookId },
       data: {
         category: {
