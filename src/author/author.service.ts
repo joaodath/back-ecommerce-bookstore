@@ -103,7 +103,6 @@ export class AuthorService {
     }
   }
         },
-        publisher: true,
         category: true,
       },
     });
