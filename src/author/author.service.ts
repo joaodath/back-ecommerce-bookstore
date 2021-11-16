@@ -103,7 +103,6 @@ export class AuthorService {
       return false;
     }
   }
-      data: {
         author: {
           disconnect: {
             id: removeBook.authorId,
