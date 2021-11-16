@@ -103,7 +103,6 @@ export class AuthorService {
       return false;
     }
   }
-      where: { id: removeBook.bookId },
       data: {
         author: {
           disconnect: {
