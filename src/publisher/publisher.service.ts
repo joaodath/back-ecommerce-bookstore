@@ -86,24 +86,24 @@ export class PublisherService {
     }
   }
 
-  async removeBook(removeBook: RemoveBookPublisherDto): Promise<Books> {
-    await this.db.books.update({
-      where: { id: removeBook.bookId },
-      data: {
-        publisher: {
-          disconnect: {
-            id: removeBook.publisherId,
+  async removeBook(removeBook: RemoveBookPublisherDto): Promise<boolean> {
+    const publisher = await this.db.publisher.findUnique({
+      where: { id: removeBook.publisherId },
+    });
+    if (publisher) {
+      await this.db.books.update({
+        where: { id: removeBook.bookId },
+        data: {
+          publisher: {
+            disconnect: {
+              id: removeBook.publisherId,
+            },
           },
         },
-      },
-    });
-    return await this.db.books.findUnique({
-      where: { id: removeBook.bookId },
-      include: {
-        author: true,
-        publisher: true,
-        category: true,
-      },
-    });
+      });
+      return true;
+    } else {
+      return false;
+    }
   }
 }
