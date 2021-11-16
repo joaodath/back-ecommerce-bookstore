@@ -89,7 +89,6 @@ export class CategoryService {
   async removeBook(removeBook: RemoveBookCategoryDto): Promise<Books> {
       data: {
         category: {
-          disconnect: {
             id: removeBook.categoryId,
           },
         },
