@@ -103,7 +103,6 @@ export class AuthorService {
     }
   }
         },
-    return await this.db.books.findUnique({
       where: { id: removeBook.bookId },
       include: {
         author: true,
