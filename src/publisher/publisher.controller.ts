@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UsePipes,
+  UseGuards,
   ValidationPipe,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -14,12 +15,14 @@ import { PublisherService } from './publisher.service';
 import { Publisher } from '.prisma/client';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
 import { UpdatePublisherDto } from './dto/update-publisher.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('publisher')
 export class PublisherController {
   constructor(private readonly publisherService: PublisherService) {}
 
   @Post('new')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(
     @Body() createPublisherDto: CreatePublisherDto,
@@ -46,6 +49,7 @@ export class PublisherController {
   }
 
   @Patch('/update/:id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -55,6 +59,7 @@ export class PublisherController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.publisherService.remove(id);
