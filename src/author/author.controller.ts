@@ -57,6 +57,7 @@ export class AuthorController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
     return await this.authorService.remove(id);
