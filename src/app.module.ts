@@ -10,6 +10,7 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { CartModule } from './cart/cart.module';
 import { BooksModule } from './books/books.module';
 import { ShoppingHistoryModule } from './shopping-history/shopping-history.module';
+import { CouponCodesModule } from './coupon-codes/coupon-codes.module';
 import { PublisherModule } from './publisher/publisher.module';
 import { CategoryModule } from './category/category.module';
 import { AuthorModule } from './author/author.module';
@@ -28,7 +29,8 @@ import { AuthorModule } from './author/author.module';
     CategoryModule,
     AuthorModule,
     CartItemsModule,
-    CartModule
+    CartModule,
+    CouponCodesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
