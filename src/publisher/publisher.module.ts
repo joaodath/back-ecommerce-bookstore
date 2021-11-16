@@ -8,5 +8,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
   imports: [PrismaModule],
   controllers: [PublisherController],
   providers: [PublisherService, PrismaService],
+  exports: [PublisherService],
 })
 export class PublisherModule {}
