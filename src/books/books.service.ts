@@ -57,5 +57,21 @@ export class BooksService {
     } else {
       throw new NotFoundException();
     }
+    
+   async removeAuthor(removeAuthor: RemoveBookAuthorDto): Promise<Books> {
+    const book = await this.db.books.findUnique({
+      where: { id: addAuthor.bookId },
+    });
+    if (book) {
+      const author = await this.author.removeBook(removeAuthor);
+      if (author) {
+        return await this.findUnique(addAuthor.bookId);
+      } else {
+        throw new NotFoundException();
+      }
+    } else {
+      throw new NotFoundException();
+    }
+  }
   }
 }
