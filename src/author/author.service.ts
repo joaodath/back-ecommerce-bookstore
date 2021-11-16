@@ -104,7 +104,6 @@ export class AuthorService {
     }
   }
         author: {
-            id: removeBook.authorId,
           },
         },
     });
