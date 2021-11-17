@@ -3,23 +3,23 @@ import {
   Get,
   Post,
   Body,
-  Param,
   UsePipes,
   ValidationPipe,
-  ParseIntPipe,
   Request,
   Delete,
   UseGuards,
   Patch,
 } from '@nestjs/common';
 import { ShoppingCartService } from './cart.service';
-import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
+import { ShoppingCart, ShoppingCartItems } from '.prisma/client';
 import { AddItemDto } from './dto/add-item.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
+import { AddCouponDto } from './dto/add-coupon.dto';
+import { RemoveCouponDto } from './dto/remove-coupon.dto';
 
 @Controller('cart')
 export class CartController {
@@ -75,6 +75,15 @@ export class CartController {
     return await this.cartService.addItemUser(req.user.username, addItemDto);
   }
 
+  @Post('user/couponCode/add')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async addCouponCode(
+    @Body() addCouponDto: AddCouponDto,
+  ): Promise<ShoppingCart> {
+    return await this.cartService.addCouponCode(addCouponDto);
+  }
+
   @Patch('user/item/update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -121,5 +130,14 @@ export class CartController {
     @Body() deleteItemDto: DeleteItemDto,
   ): Promise<ShoppingCartItems> {
     return await this.cartService.deleteItemAnon(deleteItemDto);
+  }
+
+  @Delete('user/couponCode/remove')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async removeCouponCode(
+    @Body() removeCouponDto: RemoveCouponDto,
+  ): Promise<ShoppingCart> {
+    return await this.cartService.removeCouponCode(removeCouponDto);
   }
 }

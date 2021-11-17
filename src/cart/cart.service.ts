@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
+import { ShoppingCart, ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
 import { BooksService } from 'src/books/books.service';
@@ -14,6 +14,8 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
+import { AddCouponDto } from './dto/add-coupon.dto';
+import { RemoveCouponDto } from './dto/remove-coupon.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -252,6 +254,41 @@ export class ShoppingCartService {
     }
   }
 
+  async addCouponCode(addCouponDto: AddCouponDto): Promise<ShoppingCart> {
+    const couponCode = await this.db.couponCodes.findUnique({
+      where: { code: addCouponDto.code },
+    });
+    const validUntil = addCouponDto.validUntil;
+    const expiryDay = validUntil.getDay;
+    const expiryMonth = validUntil.getMonth;
+    // const expiryYear = validUntil.getFullYear;
+    const date = new Date();
+    const nowDay = date.getDay;
+    const nowMonth = date.getMonth;
+    // const nowYear = date.getFullYear;
+    if (
+      (couponCode && expiryMonth > nowMonth) ||
+      (expiryMonth === nowMonth && expiryDay >= nowDay)
+    ) {
+      await this.db.shoppingCart.update({
+        where: { id: addCouponDto.shoppingCartId },
+        data: {
+          couponCode: {
+            connect: {
+              code: addCouponDto.code,
+            },
+          },
+        },
+      });
+      return this.db.shoppingCart.findUnique({
+        where: { id: addCouponDto.shoppingCartId },
+        include: { couponCode: true },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
   async updateItemUser(
     username: string,
     updateItemDto: UpdateItemDto,
@@ -349,6 +386,32 @@ export class ShoppingCartService {
       }
     } else {
       throw new ConflictException();
+    }
+  }
+
+  async removeCouponCode(
+    removeCouponDto: RemoveCouponDto,
+  ): Promise<ShoppingCart> {
+    const couponCode = await this.db.couponCodes.findUnique({
+      where: { code: removeCouponDto.code },
+    });
+    if (couponCode) {
+      await this.db.couponCodes.update({
+        where: { code: removeCouponDto.code },
+        data: {
+          shoppingCart: {
+            disconnect: {
+              id: removeCouponDto.shoppingCartId,
+            },
+          },
+        },
+      });
+      return this.db.shoppingCart.findUnique({
+        where: { id: removeCouponDto.shoppingCartId },
+        include: { couponCode: false },
+      });
+    } else {
+      throw new NotFoundException();
     }
   }
 }

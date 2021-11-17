@@ -13,9 +13,19 @@ import { CategoryModule } from 'src/category/category.module';
 import { CategoryService } from 'src/category/category.service';
 import { PublisherModule } from 'src/publisher/publisher.module';
 import { PublisherService } from 'src/publisher/publisher.service';
+import { CouponCodesModule } from 'src/coupon-codes/coupon-codes.module';
+import { CouponCodesService } from 'src/coupon-codes/coupon-codes.service';
 
 @Module({
-  imports: [PrismaModule, CartItemsModule, BooksModule, AuthorModule, CategoryModule, PublisherModule],
+  imports: [
+    PrismaModule,
+    CartItemsModule,
+    BooksModule,
+    AuthorModule,
+    CategoryModule,
+    PublisherModule,
+    CouponCodesModule,
+  ],
   controllers: [CartController],
   providers: [
     ShoppingCartService,
@@ -24,7 +34,8 @@ import { PublisherService } from 'src/publisher/publisher.service';
     BooksService,
     AuthorService,
     CategoryService,
-    PublisherService
+    PublisherService,
+    CouponCodesService,
   ],
   exports: [ShoppingCartService],
 })
