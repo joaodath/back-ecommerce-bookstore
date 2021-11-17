@@ -1,73 +1,52 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+## Rotas
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Rotas de Usuário
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> Parcialmente sem autenticação.
 
-## Description
+- Criar Usuário: `/user/new` (POST)
+- Encontrar um usuário por `ID`: `/user/id/:id` (GET)
+- [Rota Protegida] Encontrar um usuário por `USERNAME`: `/user/` (GET)
+- - `USERNAME` agora deve ser informado via token JWT
+- Editar informações do Usuário: `/user/:id` (PATCH)
+- Hard Delete de Usuário: `/user/:id` (DELETE)
+- Soft Delete de Usuário: `/user/softdelete/:username` (PATCH)
+- Desativar Usuário: `/user/disable/:username` (PATCH)
+- Ativar Usuário: **rota interna**
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+### Rotas de Produto
 
-## Installation
+> Ainda sem autenticação.
 
-```bash
-$ npm install
+- Criar Livro: `/books/new`
+- Encontrar um Livro por ID: `/books/id/:id`
+- Encontrar um Livro pelo Title: `/books/:title`
+- Editar informações do Livro (Patch): `/books/:id`
+- Deletar Livro: `/books/:id`
+
+### Rotas de Autenticação
+
+- Autenticar usuário: `/auth/login` (POST)
+- Checar se token JWT está válido: `/auth/test` (POST)
+- - Envie o token JWT no cabeçalho da requisição normalmente.
+    Se estiver válido, retorna o nome do usuário.
+    Se estiver vencido, retorna erro de autenticação `Error 401: Unauthorized`.
+
+## Autenticação
+
+Para adicionar autenticação nas rotas, use o Guard de autenticação da seguinte forma:
+
+No arquivo .module.ts, insira:
+
+```
+imports: [AuthModule],
 ```
 
-## Running the app
+No arquivo .controller.ts, insira:
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+@UseGuards(JwtAuthGuard)
+#dados da rota aqui
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
