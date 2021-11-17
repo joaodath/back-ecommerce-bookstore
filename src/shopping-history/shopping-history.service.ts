@@ -32,6 +32,6 @@ export class ShoppingHistoryService {
     });
   }
   async remove(id: number): Promise<ShoppingHistory> {
-    return await this.db.shoppingHistory.delete({ where: { id }});
+    return await this.db.shoppingHistory.delete({ where: { id } });
   }
 }
