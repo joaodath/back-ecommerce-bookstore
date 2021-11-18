@@ -42,6 +42,7 @@ model ShoppingCart {
   couponCodeId      String?
   discountAmount    Float?
   shippingPrice     Float?
+  subtotalPrice     Float?
   totalPrice        Float?
   isAnonymous       Boolean             @default(true)
   createdAt         DateTime            @default(now())
