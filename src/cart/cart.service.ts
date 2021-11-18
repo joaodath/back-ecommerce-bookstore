@@ -267,7 +267,7 @@ export class ShoppingCartService {
     const subTotal = currentCart.totalPrice;
     const discountAmount = couponCode.discountAmount;
     const totalPrice = subTotal - discountAmount;
-    const validUntil = addCouponDto.validUntil;
+    const validUntil = couponCode.validUntil;
     const expiryDay = validUntil.getDay;
     const expiryMonth = validUntil.getMonth;
     const expiryYear = validUntil.getFullYear;
@@ -306,38 +306,44 @@ export class ShoppingCartService {
     const currentCart = await this.db.shoppingCart.findUnique({
       where: { id: addCouponDto.shoppingCartId },
     });
-    const subTotal = currentCart.totalPrice;
-    const discountAmount = couponCode.discountAmount;
-    const totalPrice = subTotal - discountAmount;
-    const validUntil = addCouponDto.validUntil;
-    const expiryDay = validUntil.getDay;
-    const expiryMonth = validUntil.getMonth;
-    const expiryYear = validUntil.getFullYear;
-    const date = new Date();
-    const nowDay = date.getDay;
-    const nowMonth = date.getMonth;
-    const nowYear = date.getFullYear;
-    if (
-      (couponCode && expiryYear >= nowYear && expiryMonth >= nowMonth) ||
-      (couponCode && expiryMonth === nowMonth && expiryDay >= nowDay)
-    ) {
-      await this.db.shoppingCart.update({
-        where: { id: addCouponDto.shoppingCartId },
-        data: {
-          couponCode: {
-            connect: {
-              code: addCouponDto.code,
+
+    if (currentCart.isAnonymous === true) {
+      const subTotal = currentCart.subtotalPrice;
+      const shippingPrice = currentCart.shippingPrice;
+      const discountAmount = couponCode.discountAmount;
+      const totalPrice = subTotal + shippingPrice - discountAmount;
+      const validUntil = couponCode.validUntil;
+      const expiryDay = validUntil.getDay;
+      const expiryMonth = validUntil.getMonth;
+      const expiryYear = validUntil.getFullYear;
+      const date = new Date();
+      const nowDay = date.getDay;
+      const nowMonth = date.getMonth;
+      const nowYear = date.getFullYear;
+      if (
+        (couponCode && expiryYear >= nowYear && expiryMonth >= nowMonth) ||
+        (couponCode && expiryMonth === nowMonth && expiryDay >= nowDay)
+      ) {
+        await this.db.shoppingCart.update({
+          where: { id: addCouponDto.shoppingCartId },
+          data: {
+            couponCode: {
+              connect: {
+                code: addCouponDto.code,
+              },
             },
+            totalPrice: totalPrice,
           },
-          totalPrice: totalPrice,
-        },
-      });
-      return this.db.shoppingCart.findUnique({
-        where: { id: addCouponDto.shoppingCartId },
-        include: { couponCode: true },
-      });
+        });
+        return this.db.shoppingCart.findUnique({
+          where: { id: addCouponDto.shoppingCartId },
+          include: { couponCode: true },
+        });
+      } else {
+        throw new NotFoundException();
+      }
     } else {
-      throw new NotFoundException();
+      throw new ConflictException();
     }
   }
 
@@ -449,26 +455,31 @@ export class ShoppingCartService {
       where: { username: username },
     });
     removeCouponDto.shoppingCartId = shoppingCart.id;
-    const couponCode = await this.db.couponCodes.findUnique({
-      where: { code: removeCouponDto.code },
-    });
-    if (couponCode) {
-      await this.db.couponCodes.update({
+
+    if (shoppingCart.isAnonymous === true) {
+      const couponCode = await this.db.couponCodes.findUnique({
         where: { code: removeCouponDto.code },
-        data: {
-          shoppingCart: {
-            disconnect: {
-              id: removeCouponDto.shoppingCartId,
+      });
+      if (couponCode) {
+        await this.db.couponCodes.update({
+          where: { code: removeCouponDto.code },
+          data: {
+            shoppingCart: {
+              disconnect: {
+                id: removeCouponDto.shoppingCartId,
+              },
             },
           },
-        },
-      });
-      return this.db.shoppingCart.findUnique({
-        where: { id: removeCouponDto.shoppingCartId },
-        include: { couponCode: false },
-      });
+        });
+        return this.db.shoppingCart.findUnique({
+          where: { id: removeCouponDto.shoppingCartId },
+          include: { couponCode: false },
+        });
+      } else {
+        throw new NotFoundException();
+      }
     } else {
-      throw new NotFoundException();
+      throw new ConflictException();
     }
   }
 

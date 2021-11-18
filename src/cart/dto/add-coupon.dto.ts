@@ -4,9 +4,6 @@ export class AddCouponDto {
   @IsString()
   code: string;
 
-  @IsDate()
-  validUntil: Date;
-
   @IsNumber()
   shoppingCartId?: number;
 }
