@@ -78,10 +78,23 @@ export class CartController {
   @Post('user/couponCode/add')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async addCouponCode(
+  async addCouponCodeUser(
+    @Request() req,
     @Body() addCouponDto: AddCouponDto,
   ): Promise<ShoppingCart> {
-    return await this.cartService.addCouponCode(addCouponDto);
+    return await this.cartService.addCouponCodeUser(
+      req.user.username,
+      addCouponDto,
+    );
+  }
+
+  @Post('anon/couponCode/add')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async addCouponCodeAnon(
+    @Body() addCouponDto: AddCouponDto,
+  ): Promise<ShoppingCart> {
+    return await this.cartService.addCouponCodeAnon(addCouponDto);
   }
 
   @Patch('user/item/update')
@@ -135,9 +148,22 @@ export class CartController {
   @Delete('user/couponCode/remove')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async removeCouponCode(
+  async removeCouponCodeUser(
+    @Request() req,
     @Body() removeCouponDto: RemoveCouponDto,
   ): Promise<ShoppingCart> {
-    return await this.cartService.removeCouponCode(removeCouponDto);
+    return await this.cartService.removeCouponCodeUser(
+      req.user.username,
+      removeCouponDto,
+    );
+  }
+
+  @Delete('anon/couponCode/remove')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async removeCouponCodeAnon(
+    @Body() removeCouponDto: RemoveCouponDto,
+  ): Promise<ShoppingCart> {
+    return await this.cartService.removeCouponCodeAnon(removeCouponDto);
   }
 }

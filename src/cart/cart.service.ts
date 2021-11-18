@@ -254,21 +254,30 @@ export class ShoppingCartService {
     }
   }
 
-  async addCouponCode(addCouponDto: AddCouponDto): Promise<ShoppingCart> {
+  async addCouponCodeUser(
+    username: string,
+    addCouponDto: AddCouponDto,
+  ): Promise<ShoppingCart> {
     const couponCode = await this.db.couponCodes.findUnique({
       where: { code: addCouponDto.code },
     });
+    const currentCart = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    const subTotal = currentCart.totalPrice;
+    const discountAmount = couponCode.discountAmount;
+    const totalPrice = subTotal - discountAmount;
     const validUntil = addCouponDto.validUntil;
     const expiryDay = validUntil.getDay;
     const expiryMonth = validUntil.getMonth;
-    // const expiryYear = validUntil.getFullYear;
+    const expiryYear = validUntil.getFullYear;
     const date = new Date();
     const nowDay = date.getDay;
     const nowMonth = date.getMonth;
-    // const nowYear = date.getFullYear;
+    const nowYear = date.getFullYear;
     if (
-      (couponCode && expiryMonth > nowMonth) ||
-      (expiryMonth === nowMonth && expiryDay >= nowDay)
+      (couponCode && expiryYear >= nowYear && expiryMonth >= nowMonth) ||
+      (couponCode && expiryMonth === nowMonth && expiryDay >= nowDay)
     ) {
       await this.db.shoppingCart.update({
         where: { id: addCouponDto.shoppingCartId },
@@ -278,6 +287,49 @@ export class ShoppingCartService {
               code: addCouponDto.code,
             },
           },
+          totalPrice: totalPrice,
+        },
+      });
+      return this.db.shoppingCart.findUnique({
+        where: { id: addCouponDto.shoppingCartId },
+        include: { couponCode: true },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async addCouponCodeAnon(addCouponDto: AddCouponDto): Promise<ShoppingCart> {
+    const couponCode = await this.db.couponCodes.findUnique({
+      where: { code: addCouponDto.code },
+    });
+    const currentCart = await this.db.shoppingCart.findUnique({
+      where: { id: addCouponDto.shoppingCartId },
+    });
+    const subTotal = currentCart.totalPrice;
+    const discountAmount = couponCode.discountAmount;
+    const totalPrice = subTotal - discountAmount;
+    const validUntil = addCouponDto.validUntil;
+    const expiryDay = validUntil.getDay;
+    const expiryMonth = validUntil.getMonth;
+    const expiryYear = validUntil.getFullYear;
+    const date = new Date();
+    const nowDay = date.getDay;
+    const nowMonth = date.getMonth;
+    const nowYear = date.getFullYear;
+    if (
+      (couponCode && expiryYear >= nowYear && expiryMonth >= nowMonth) ||
+      (couponCode && expiryMonth === nowMonth && expiryDay >= nowDay)
+    ) {
+      await this.db.shoppingCart.update({
+        where: { id: addCouponDto.shoppingCartId },
+        data: {
+          couponCode: {
+            connect: {
+              code: addCouponDto.code,
+            },
+          },
+          totalPrice: totalPrice,
         },
       });
       return this.db.shoppingCart.findUnique({
@@ -389,7 +441,38 @@ export class ShoppingCartService {
     }
   }
 
-  async removeCouponCode(
+  async removeCouponCodeUser(
+    username: string,
+    removeCouponDto: RemoveCouponDto,
+  ): Promise<ShoppingCart> {
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    removeCouponDto.shoppingCartId = shoppingCart.id;
+    const couponCode = await this.db.couponCodes.findUnique({
+      where: { code: removeCouponDto.code },
+    });
+    if (couponCode) {
+      await this.db.couponCodes.update({
+        where: { code: removeCouponDto.code },
+        data: {
+          shoppingCart: {
+            disconnect: {
+              id: removeCouponDto.shoppingCartId,
+            },
+          },
+        },
+      });
+      return this.db.shoppingCart.findUnique({
+        where: { id: removeCouponDto.shoppingCartId },
+        include: { couponCode: false },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async removeCouponCodeAnon(
     removeCouponDto: RemoveCouponDto,
   ): Promise<ShoppingCart> {
     const couponCode = await this.db.couponCodes.findUnique({
