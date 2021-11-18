@@ -35,13 +35,13 @@ export class BooksController {
     return this.booksService.findUnique(id);
   }
 
-  @Get(':title')
+  @Get('/title/:title')
   @UsePipes(ValidationPipe)
   async findTitle(@Param('title') title: string): Promise<Books[]> {
     return await this.booksService.findByTitle(title);
   }
 
-  @Get(':publisher')
+  @Get('/publisher/:publisher')
   @UsePipes(ValidationPipe)
   async findPublisher(
     @Param('publisher') publisher: string,
@@ -49,13 +49,13 @@ export class BooksController {
     return await this.booksService.findByPublisher(publisher);
   }
 
-  @Get(':author')
+  @Get('/author/:author')
   @UsePipes(ValidationPipe)
   async findAuthor(@Param('author') author: string): Promise<Authors[]> {
     return await this.booksService.findByAuthor(author);
   }
 
-  @Get(':category')
+  @Get('/category/:category')
   @UsePipes(ValidationPipe)
   async findCategory(@Param('category') category: string): Promise<Category[]> {
     return await this.booksService.findByCategory(category);
