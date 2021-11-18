@@ -11,7 +11,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
-import { Prisma, Books } from '.prisma/client';
+import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
 
 @Controller('books')
 export class BooksController {
@@ -39,6 +39,26 @@ export class BooksController {
   @UsePipes(ValidationPipe)
   async findTitle(@Param('title') title: string): Promise<Books[]> {
     return await this.booksService.findByTitle(title);
+  }
+
+  @Get(':publisher')
+  @UsePipes(ValidationPipe)
+  async findPublisher(
+    @Param('publisher') publisher: string,
+  ): Promise<Publisher[]> {
+    return await this.booksService.findByPublisher(publisher);
+  }
+
+  @Get(':author')
+  @UsePipes(ValidationPipe)
+  async findAuthor(@Param('author') author: string): Promise<Authors[]> {
+    return await this.booksService.findByAuthor(author);
+  }
+
+  @Get(':category')
+  @UsePipes(ValidationPipe)
+  async findCategory(@Param('category') category: string): Promise<Category[]> {
+    return await this.booksService.findByCategory(category);
   }
 
   @Patch(':id')

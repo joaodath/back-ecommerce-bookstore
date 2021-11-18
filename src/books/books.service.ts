@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Books } from '.prisma/client';
+import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PublisherService } from 'src/publisher/publisher.service';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
@@ -41,6 +41,48 @@ export class BooksService {
 
   async findByTitle(title: string): Promise<Books[]> {
     return await this.db.books.findMany({ where: { title } });
+  }
+
+  async findByPublisher(publisher: string): Promise<Publisher[]> {
+    return await this.db.publisher.findMany({
+      where: { name: publisher },
+      include: {
+        books: {
+          include: {
+            category: true,
+            author: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByAuthor(author: string): Promise<Authors[]> {
+    return await this.db.authors.findMany({
+      where: { name: author },
+      include: {
+        books: {
+          include: {
+            category: true,
+            publisher: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByCategory(category: string): Promise<Category[]> {
+    return await this.db.category.findMany({
+      where: { name: category },
+      include: {
+        books: {
+          include: {
+            publisher: true,
+            author: true,
+          },
+        },
+      },
+    });
   }
 
   async update(
