@@ -33,11 +33,11 @@ export class UserController {
     return await this.userService.findAll();
   }
 
-  @Get('/id/:id')
-  @UsePipes(ValidationPipe)
-  async findUnique(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return await this.userService.findUnique(id);
-  }
+  // @Get('/id/:id')
+  // @UsePipes(ValidationPipe)
+  // async findUnique(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  //   return await this.userService.findUnique(id);
+  // }
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -47,29 +47,32 @@ export class UserController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
     @Body() updateUserDto: Prisma.UserUpdateInput,
   ): Promise<User> {
-    return await this.userService.update(id, updateUserDto);
+    return await this.userService.update(req.user.username, updateUserDto);
   }
 
-  @Patch('disable/:username')
+  @Patch('disable')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async disable(@Param('username') username: string): Promise<User> {
-    return await this.userService.disable(username);
+  async disable(@Request() req): Promise<User> {
+    return await this.userService.disable(req.user.username);
   }
 
-  @Patch('/softdelete/:username')
+  @Patch('softdelete')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
-  async softDelete(@Param('username') username: string): Promise<User> {
-    return await this.userService.softDelete(username);
+  async softDelete(@Request() req): Promise<User> {
+    return await this.userService.softDelete(req.user.username);
   }
 
-  @Delete(':id')
+  @Delete('del/:username')
   @UsePipes(ValidationPipe)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return await this.userService.remove(id);
+  async remove(@Param('username') username: string): Promise<User> {
+    return await this.userService.remove(username);
   }
 }

@@ -1,31 +1,36 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
+    "profilePhoto" TEXT,
+    "birthDate" TIMESTAMP(3) NOT NULL,
     "cpf" TEXT NOT NULL,
-    "cep" TEXT NOT NULL,
-    "country" TEXT NOT NULL,
-    "state" TEXT NOT NULL,
-    "city" TEXT NOT NULL,
-    "address" TEXT NOT NULL,
-    "phonenumber" TEXT NOT NULL,
+    "cep" TEXT,
+    "country" TEXT,
+    "state" TEXT,
+    "city" TEXT,
+    "address" TEXT,
+    "phonenumber" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "deleted" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("username")
 );
 
 -- CreateTable
 CREATE TABLE "ShoppingCart" (
     "id" SERIAL NOT NULL,
-    "userId" INTEGER,
+    "username" TEXT,
     "couponCodeId" TEXT,
-    "discountAmount" DOUBLE PRECISION NOT NULL,
-    "shippingPrice" DOUBLE PRECISION NOT NULL,
-    "totalPrice" DOUBLE PRECISION NOT NULL,
+    "discountAmount" DOUBLE PRECISION,
+    "shippingPrice" DOUBLE PRECISION,
+    "totalPrice" DOUBLE PRECISION,
+    "isAnonymous" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ShoppingCart_pkey" PRIMARY KEY ("id")
 );
@@ -34,8 +39,9 @@ CREATE TABLE "ShoppingCart" (
 CREATE TABLE "ShoppingCartItems" (
     "id" SERIAL NOT NULL,
     "shoppingCartId" INTEGER,
-    "bookId" INTEGER,
-    "price" INTEGER NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "totalPrice" DOUBLE PRECISION NOT NULL,
 
     CONSTRAINT "ShoppingCartItems_pkey" PRIMARY KEY ("id")
 );
@@ -70,8 +76,8 @@ CREATE TABLE "Books" (
     "isbn13" INTEGER NOT NULL DEFAULT 0,
     "isbn10" INTEGER NOT NULL DEFAULT 0,
     "score" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "price" INTEGER NOT NULL,
-    "discountedPrice" INTEGER,
+    "price" DOUBLE PRECISION NOT NULL,
+    "discountedPrice" DOUBLE PRECISION,
     "discountCheck" BOOLEAN NOT NULL DEFAULT false,
     "inventoryAmount" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -107,8 +113,8 @@ CREATE TABLE "Category" (
 -- CreateTable
 CREATE TABLE "ShoppingHistory" (
     "id" SERIAL NOT NULL,
-    "userId" INTEGER,
-    "totalPrice" INTEGER NOT NULL,
+    "username" TEXT,
+    "totalPrice" DOUBLE PRECISION NOT NULL,
     "couponCodeId" TEXT,
     "couponCodeStr" TEXT,
     "discountAmount" DOUBLE PRECISION NOT NULL,
@@ -122,7 +128,7 @@ CREATE TABLE "ShoppingHistory" (
 CREATE TABLE "ShoppingHistoryItem" (
     "id" SERIAL NOT NULL,
     "bookId" INTEGER,
-    "bookPrice" INTEGER NOT NULL,
+    "bookPrice" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "shoppingHistoryId" INTEGER,
 
@@ -132,19 +138,19 @@ CREATE TABLE "ShoppingHistoryItem" (
 -- CreateTable
 CREATE TABLE "_BooksToUser" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "_ShoppingCartToUser" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "_ShoppingHistoryToUser" (
     "A" INTEGER NOT NULL,
-    "B" INTEGER NOT NULL
+    "B" TEXT NOT NULL
 );
 
 -- CreateTable
@@ -202,13 +208,13 @@ CREATE TABLE "_ShoppingHistoryToShoppingHistoryItem" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
-
--- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_cpf_key" ON "User"("cpf");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ShoppingCart_username_key" ON "ShoppingCart"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CouponCodes_code_key" ON "CouponCodes"("code");
@@ -221,6 +227,9 @@ CREATE UNIQUE INDEX "Books_isbn10_key" ON "Books"("isbn10");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ShoppingHistory_username_key" ON "ShoppingHistory"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_BooksToUser_AB_unique" ON "_BooksToUser"("A", "B");
@@ -295,7 +304,7 @@ CREATE UNIQUE INDEX "_ShoppingHistoryToShoppingHistoryItem_AB_unique" ON "_Shopp
 CREATE INDEX "_ShoppingHistoryToShoppingHistoryItem_B_index" ON "_ShoppingHistoryToShoppingHistoryItem"("B");
 
 -- AddForeignKey
-ALTER TABLE "ShoppingCart" ADD CONSTRAINT "ShoppingCart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ShoppingCart" ADD CONSTRAINT "ShoppingCart_username_fkey" FOREIGN KEY ("username") REFERENCES "User"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ShoppingCart" ADD CONSTRAINT "ShoppingCart_couponCodeId_fkey" FOREIGN KEY ("couponCodeId") REFERENCES "CouponCodes"("code") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -304,10 +313,7 @@ ALTER TABLE "ShoppingCart" ADD CONSTRAINT "ShoppingCart_couponCodeId_fkey" FOREI
 ALTER TABLE "ShoppingCartItems" ADD CONSTRAINT "ShoppingCartItems_shoppingCartId_fkey" FOREIGN KEY ("shoppingCartId") REFERENCES "ShoppingCart"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ShoppingCartItems" ADD CONSTRAINT "ShoppingCartItems_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Books"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ShoppingHistory" ADD CONSTRAINT "ShoppingHistory_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ShoppingHistory" ADD CONSTRAINT "ShoppingHistory_username_fkey" FOREIGN KEY ("username") REFERENCES "User"("username") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ShoppingHistory" ADD CONSTRAINT "ShoppingHistory_couponCodeId_fkey" FOREIGN KEY ("couponCodeId") REFERENCES "CouponCodes"("code") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -322,19 +328,19 @@ ALTER TABLE "ShoppingHistoryItem" ADD CONSTRAINT "ShoppingHistoryItem_shoppingHi
 ALTER TABLE "_BooksToUser" ADD FOREIGN KEY ("A") REFERENCES "Books"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_BooksToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_BooksToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("username") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ShoppingCartToUser" ADD FOREIGN KEY ("A") REFERENCES "ShoppingCart"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ShoppingCartToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_ShoppingCartToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("username") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ShoppingHistoryToUser" ADD FOREIGN KEY ("A") REFERENCES "ShoppingHistory"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_ShoppingHistoryToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_ShoppingHistoryToUser" ADD FOREIGN KEY ("B") REFERENCES "User"("username") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ShoppingCartToShoppingCartItems" ADD FOREIGN KEY ("A") REFERENCES "ShoppingCart"("id") ON DELETE CASCADE ON UPDATE CASCADE;
