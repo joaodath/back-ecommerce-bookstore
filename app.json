@@ -1,0 +1,53 @@
+{
+    "name": "eCommerce Backend OSF - Bootcamp Blue Edtech",
+    "description": "Projeto de backend para ecommerce desenvolvido no Bootcamp 2021 C005 da Blue Edtech para a OSF.",
+    "keywords": [
+      "ecommerce",
+      "bookstore",
+      "bootcamp"
+    ],
+    "repository": "https://github.com/joaodath/back-ecommerce-osf",
+    "env": {
+      "JWT_SECRET": {
+        "description": "A secret key for verifying the integrity of signed JWT tokens.",
+        "generator": "secret"
+      },
+      "JWT_EXPIRES_IN": {
+        "description": "The number of seconds before a token expires.",
+        "value": "604800s"
+      },
+      "NPM_CONFIG_PRODUCTION": {
+          "description": "If true, removes devDependencies before building the project.",
+          "value": false
+      }
+    },
+    "formation": {
+      "web": {
+        "quantity": 1,
+        "size": "free"
+      }
+    },
+    "addons": [
+      {
+        "plan": "heroku-postgresql:hobby-dev"
+      }
+    ],
+    "environments": {
+      "review": {
+        "env":{
+          "JWT_SECRET": {
+            "description": "A secret key for verifying the integrity of signed JWT tokens.",
+            "generator": "secretKey"
+          },
+          "JWT_EXPIRES_IN": {
+            "description": "The number of seconds before a token expires.",
+            "value": "604800s"
+          },
+          "NPM_CONFIG_PRODUCTION": {
+              "description": "If true, removes devDependencies before building the project.",
+              "value": false
+          }
+        }
+      }
+    }
+  }
