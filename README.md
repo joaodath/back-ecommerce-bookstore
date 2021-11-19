@@ -14,24 +14,19 @@
 - Desativar Usuário: `/user/disable/:username` (PATCH)
 - Ativar Usuário: **rota interna**
 
-### Rotas de Produto
+### Rotas de Livros
 
 > Ainda sem autenticação.
 
 - Criar Livro: `/books/new` (POST)
 - Encontrar um Livro por `ID`: `/books/id/:id` (GET)
 - Encontrar todos os Livros: `/books/all` (GET)
-- Encontrar um Livro pelo Title: `/books/:title` (GET)
+- Encontrar um Livro pelo Título: `/books/:title` (GET)
+- Encontrar um Livro pelo Autor: `/books/author/:author` (GET)
+- Encontrar um Livro pela Categoria: `/books/category/:category` (GET)
+- Encontrar um Livro pela Editora: `/books/publisher/:publisher` (GET)
 - Editar informações do Livro: `/books/:id` (PATCH)
 - Deletar Livro: `/books/:id` (DELETE)
-
-### Rotas de Autenticação
-
-- Autenticar usuário: `/auth/login` (POST)
-- Checar se token JWT está válido: `/auth/test` (POST)
-- - Envie o token JWT no cabeçalho da requisição normalmente.
-    Se estiver válido, retorna o nome do usuário.
-    Se estiver vencido, retorna erro de autenticação `Error 401: Unauthorized`.
 
 ### Rotas de ShoppingHistory
 
@@ -85,6 +80,7 @@
 - Encontrar todos os Publisher: `/publisher/all` (GET)
 - Editar informações do Publisher: `/publisher/update/:id` (PATCH)
 - Deletar Publisher: `/publisher/:id` (DELETE)
+
 ## Rotas de Carrinho
 
 - **Buscar os dados do carrinho:**
@@ -125,3 +121,11 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 #dados da rota aqui
 ```
+
+### Rotas de Autenticação
+
+- Autenticar usuário: `/auth/login` (POST)
+- Checar se token JWT está válido: `/auth/test` (POST)
+- - Envie o token JWT no cabeçalho da requisição normalmente.
+    Se estiver válido, retorna o nome do usuário.
+    Se estiver vencido, retorna erro de autenticação `Error 401: Unauthorized`.
