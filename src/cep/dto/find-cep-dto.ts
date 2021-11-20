@@ -1,7 +1,7 @@
-import { IsString, Length } from 'class-validator';
+import { IsNumberString, Length } from 'class-validator';
 
 export class FindCepDto {
-  @IsString()
+  @IsNumberString()
   @Length(8, 8)
   cep: string;
 }
