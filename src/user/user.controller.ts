@@ -48,6 +48,15 @@ export class UserController {
     return await this.userService.findByUsername(req.user.username);
   }
 
+  @Get('username/:username')
+  // @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async findByUsernameAdm(
+    @Param('username') username: string,
+  ): Promise<userWithoutPasswordDto> {
+    return await this.userService.findByUsername(username);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
