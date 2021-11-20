@@ -13,11 +13,11 @@ datasource db {
 model User {
   name            String
   username        String            @id
-  email           String            @unique
+  email           String            
   password        String
   profilePhoto    String?
   birthDate       DateTime
-  cpf             String            @unique
+  cpf             String            
   cep             String?
   country         String?
   state           String?

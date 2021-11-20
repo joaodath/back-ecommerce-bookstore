@@ -21,19 +21,34 @@ export class UserService {
         `Username ${createUserDto.username} already exists`,
       );
     }
-    const emailExists = await this.db.user.findUnique({
+    const emailExists = await this.db.user.findMany({
       where: { email: createUserDto.email },
     });
     if (emailExists) {
-      throw new ConflictException(
-        `Email ${createUserDto.email} already exists`,
-      );
+      for (const user of emailExists) {
+        if (user.deleted === false) {
+          throw new ConflictException(
+            `Email ${createUserDto.email} already exists`,
+          );
+        }
+      }
+      // if (emailExists.deleted === false) {
+      //   throw new ConflictException(
+      //     `Email ${createUserDto.email} already exists`,
+      //   );
+      // }
     }
-    const cpfExists = await this.db.user.findUnique({
+    const cpfExists = await this.db.user.findMany({
       where: { cpf: createUserDto.cpf },
     });
     if (cpfExists) {
-      throw new ConflictException(`CPF ${createUserDto.cpf} already exists`);
+      for (const user of cpfExists) {
+        if (user.deleted === false) {
+          throw new ConflictException(
+            `CPF ${createUserDto.cpf} already exists`,
+          );
+        }
+      }
     }
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     return await this.db.user.create({
