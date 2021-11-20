@@ -3,12 +3,12 @@ import { CreateCepDto } from './dto/create-cep.dto';
 import { UpdateCepDto } from './dto/update-cep.dto';
 import { FindCepDto } from './dto/find-cep-dto';
 import { ReturnCepDto } from './dto/return-cep.dto';
-import { FetchCepDto } from './dto/fetch-cep.dto';
 import {
   calcularPrecoPrazo,
   consultarCep,
   rastrearEncomendas,
 } from 'correios-brasil';
+import { ReturnShippingPriceDeliveryDto } from './dto/return-shipping-price-delivery.dto';
 
 @Injectable()
 export class CepService {
@@ -42,6 +42,10 @@ export class CepService {
       return cepDataClean;
     }
   }
+
+  async calculateShippingPriceAndDeliveryEstimate(): Promise<ReturnShippingPriceDeliveryDto> {
+    
+  };
 
   findOne(id: number) {
     return `This action returns a #${id} cep`;
