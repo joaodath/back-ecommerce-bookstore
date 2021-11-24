@@ -38,5 +38,5 @@ lerna-debug.log*
 .env
 
 #keys
-.key
-.key.pub
+*.key
+*.key.pub
