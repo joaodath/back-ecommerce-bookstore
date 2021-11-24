@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   Request,
   UseGuards,
+  ConflictException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
@@ -23,8 +24,15 @@ export class UserController {
 
   @Post('new')
   @UsePipes(ValidationPipe)
-  async create(@Body() createUserDto: Prisma.UserCreateInput): Promise<User> {
-    return await this.userService.create(createUserDto);
+  async create(
+    @Request() req,
+    @Body() createUserDto: Prisma.UserCreateInput,
+  ): Promise<User> {
+    if (req.headers.authorization) {
+      throw new ConflictException();
+    } else {
+      return await this.userService.create(createUserDto);
+    }
   }
 
   @Get('all')
@@ -33,12 +41,6 @@ export class UserController {
     return await this.userService.findAll();
   }
 
-  // @Get('/id/:id')
-  // @UsePipes(ValidationPipe)
-  // async findUnique(@Param('id', ParseIntPipe) id: number): Promise<User> {
-  //   return await this.userService.findUnique(id);
-  // }
-
   @Get()
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -46,7 +48,16 @@ export class UserController {
     return await this.userService.findByUsername(req.user.username);
   }
 
-  @Patch(':id')
+  @Get('username/:username')
+  // @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async findByUsernameAdm(
+    @Param('username') username: string,
+  ): Promise<userWithoutPasswordDto> {
+    return await this.userService.findByUsername(username);
+  }
+
+  @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
