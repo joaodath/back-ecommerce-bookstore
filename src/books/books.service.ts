@@ -10,6 +10,7 @@ import { AuthorService } from 'src/author/author.service';
 import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
+import { CreateBookDto } from './dto/create-book.dto';
 
 @Injectable()
 export class BooksService {
@@ -20,8 +21,84 @@ export class BooksService {
     private publisher: PublisherService,
   ) {}
 
-  async create(createBookDto: Prisma.BooksCreateInput): Promise<Books> {
-    return await this.db.books.create({ data: createBookDto });
+  async create(createBookDto: CreateBookDto): Promise<Books> {
+    try {
+      if (createBookDto.ebook) {
+        if (createBookDto.hardCover === true) {
+          throw new Error('Book can not be both e-book and hard cover');
+        }
+        if (createBookDto.weight) {
+          throw new Error('eBook can not have weight');
+        }
+        if (
+          createBookDto.length ||
+          createBookDto.width ||
+          createBookDto.height
+        ) {
+          throw new Error('eBook can not have dimensions');
+        }
+      }
+      const {
+        authorId,
+        author,
+        publisherId,
+        publisher,
+        categoryId,
+        category,
+        ...bookData
+      } = createBookDto;
+      const bookCreated = await this.db.books.create({ data: bookData });
+      if (!bookCreated) {
+        throw new Error('Book not created. Try again.');
+      }
+
+      if (createBookDto.authorId && createBookDto.author) {
+        await this.db.books.update({
+          where: { id: bookCreated.id },
+          data: {
+            author: {
+              connectOrCreate: {
+                where: { id: createBookDto.authorId },
+                create: { name: createBookDto.author },
+              },
+            },
+          },
+        });
+      }
+
+      if (createBookDto.categoryId && createBookDto.category) {
+        await this.db.books.update({
+          where: { id: bookCreated.id },
+          data: {
+            category: {
+              connectOrCreate: {
+                where: { id: createBookDto.categoryId },
+                create: { name: createBookDto.category },
+              },
+            },
+          },
+        });
+      }
+
+      if (createBookDto.publisherId && createBookDto.publisher) {
+        await this.db.books.update({
+          where: { id: bookCreated.id },
+          data: {
+            publisher: {
+              connectOrCreate: {
+                where: { id: createBookDto.publisherId },
+                create: { name: createBookDto.publisher },
+              },
+            },
+          },
+        });
+      }
+
+      return await this.findUnique(bookCreated.id);
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error happened. Try again!');
+    }
   }
 
   async findAll(): Promise<Books[]> {
