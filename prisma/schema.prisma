@@ -52,6 +52,7 @@ model ShoppingCartItems {
   shoppingCart   ShoppingCart[] @relation(fields: [shoppingCartId], references: [id])
   shoppingCartId Int?
   book           Books[]
+  bookId         Int
   price          Float
   quantity       Int
   totalPrice     Float
