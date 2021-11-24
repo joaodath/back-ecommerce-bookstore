@@ -19,7 +19,9 @@ import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 import { CreateBookDto } from './dto/create-book.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Books')
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}

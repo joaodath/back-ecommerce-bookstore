@@ -17,6 +17,7 @@ import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
+import { ApiHeader } from '@nestjs/swagger';
 
 @Controller('user')
 export class UserController {
@@ -41,6 +42,10 @@ export class UserController {
     return await this.userService.findAll();
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Get()
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
