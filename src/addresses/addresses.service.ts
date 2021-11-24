@@ -18,6 +18,12 @@ export class AddressesService {
     return await this.db.userAddresses.findMany();
   }
 
+  async findUniqueAddress(id: number): Promise<UserAddresses> {
+    return await this.db.userAddresses.findUnique({
+      where: { id: id },
+    });
+  }
+
   async updateAddress(
     id: number,
     updateAddressDto: UpdateAddressDto,
