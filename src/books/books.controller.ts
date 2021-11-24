@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
+import { AddBookCategoryDto } from 'src/category/dto/add-book-category.dto';
+import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
 
 @Controller('books')
 export class BooksController {
@@ -55,12 +57,6 @@ export class BooksController {
     return await this.booksService.findByAuthor(author);
   }
 
-  @Get('/category/:category')
-  @UsePipes(ValidationPipe)
-  async findCategory(@Param('category') category: string): Promise<Category[]> {
-    return await this.booksService.findByCategory(category);
-  }
-
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
@@ -68,6 +64,28 @@ export class BooksController {
     @Body() updateBookDto: Prisma.BooksUpdateInput,
   ): Promise<Books> {
     return await this.booksService.update(id, updateBookDto);
+  }
+
+  //Rotas de Categoria
+  @Get('/category/:category')
+  @UsePipes(ValidationPipe)
+  async findCategory(@Param('category') category: string): Promise<Category[]> {
+    return await this.booksService.findByCategory(category);
+  }
+
+  @Post('add/category')
+  @UsePipes(ValidationPipe)
+  async addCategory(
+    @Body() addCategoryDto: AddBookCategoryDto,
+  ): Promise<Books> {
+    return await this.booksService.addCategory(addCategoryDto);
+  }
+
+  @Post('remove/category')
+  async removeCategory(
+    @Body() removeCategoryDto: RemoveBookCategoryDto,
+  ): Promise<Books> {
+    return await this.booksService.removeCategory(removeCategoryDto);
   }
 
   @Delete(':id')
