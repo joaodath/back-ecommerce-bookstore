@@ -22,7 +22,7 @@ export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
   @Post('new')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(@Body() createAuthorDto: CreateAuthorDto): Promise<Authors> {
     return await this.authorService.create(createAuthorDto);
