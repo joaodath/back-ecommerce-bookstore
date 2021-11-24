@@ -58,7 +58,7 @@ export class CategoryController {
     return await this.categoryService.update(id, updateCategoryDto);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Category> {
