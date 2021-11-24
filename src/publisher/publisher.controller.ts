@@ -22,7 +22,7 @@ export class PublisherController {
   constructor(private readonly publisherService: PublisherService) {}
 
   @Post('new')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(
     @Body() createPublisherDto: CreatePublisherDto,
