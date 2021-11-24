@@ -12,6 +12,13 @@ import { userWithoutPasswordDto } from './dto/user-without-password.dto';
 @Injectable()
 export class UserService {
   constructor(private db: PrismaService) {}
+  calculateAge(birthday: Date) {
+    // birthday is a date
+    const ageDifMs = Date.now() - birthday.getTime();
+    const ageDate = new Date(ageDifMs); // miliseconds from epoch
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  }
+
   async create(createUserDto: Prisma.UserCreateInput): Promise<User> {
     const usernameExists = await this.db.user.findUnique({
       where: { username: createUserDto.username },
@@ -32,12 +39,14 @@ export class UserService {
           );
         }
       }
-      // if (emailExists.deleted === false) {
-      //   throw new ConflictException(
-      //     `Email ${createUserDto.email} already exists`,
-      //   );
-      // }
     }
+    const userAge = this.calculateAge(new Date(createUserDto.birthDate));
+    if (userAge < 18) {
+      throw new ConflictException(
+        `User must be at least 18 years old to register`,
+      );
+    }
+
     const cpfExists = await this.db.user.findMany({
       where: { cpf: createUserDto.cpf },
     });
@@ -91,10 +100,18 @@ export class UserService {
     username: string,
     updateUserDto: Prisma.UserUpdateInput,
   ): Promise<User> {
-    return await this.db.user.update({
+    const user = await this.db.user.findUnique({
       where: { username: username },
-      data: updateUserDto,
     });
+    if (!user) {
+      throw new NotFoundException();
+    } else {
+      const { cpf, ...userWithoutCPF } = updateUserDto;
+      return await this.db.user.update({
+        where: { username: username },
+        data: userWithoutCPF,
+      });
+    }
   }
 
   async remove(username: string): Promise<User> {

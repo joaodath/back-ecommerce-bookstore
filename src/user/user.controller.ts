@@ -57,7 +57,7 @@ export class UserController {
     return await this.userService.findByUsername(username);
   }
 
-  @Patch(':id')
+  @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
