@@ -18,19 +18,27 @@ model User {
   profilePhoto    String?
   birthDate       DateTime
   cpf             String            @unique
-  cep             String?
-  country         String?
-  state           String?
-  city            String?
-  address         String?
   phonenumber     String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   booksBought     Books[]
   shoppingCart    ShoppingCart[]
   shoppingHistory ShoppingHistory[]
+  userAddresses UserAddresses[]
   active          Boolean           @default(true)
   deleted         Boolean           @default(false)
+}
+
+model UserAddresses {
+  id Int @id @default(autoincrement())
+  user              User[]              @relation(fields: [username], references: [username])
+  username String? @unique
+  isMain Boolean @default(false)
+  cep             String?
+  country         String?
+  state           String?
+  city            String?
+  address         String?
 }
 
 model ShoppingCart {
