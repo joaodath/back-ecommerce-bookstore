@@ -103,6 +103,10 @@
 - - Carrinho Anônimo: `/cart/anon/item/delete` (DELETE) passando um `DeleteItemDto`
 - - Carrinho de Usuário: `/cart/user/item/delete` (DELETE) passando o token JWT e um `DeleteItemDto`
 
+## Rotas de CEP
+
+- **Encontrar um endereço com o CEP:** `/cep/find` (POST) passando um `FindCepDto` contendo um CEP string de 8 caracteres.
+
 ## Autenticação
 
 Para adicionar autenticação nas rotas, use o Guard de autenticação da seguinte forma:
