@@ -14,6 +14,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
+import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -196,7 +197,7 @@ export class ShoppingCartService {
         price: bookPrice,
         quantity: addItemDto.quantity,
       };
-      await this.cartItems.createItem(createCartItemsDto, addItemDto.bookId);
+      await this.cartItems.createItem(createCartItemsDto);
       return this.db.shoppingCart.findUnique({
         where: { id: addItemDto.shoppingCartId },
         include: { shoppingCartItems: true },
@@ -233,7 +234,7 @@ export class ShoppingCartService {
           price: bookPrice,
           quantity: addItemDto.quantity,
         };
-        await this.cartItems.createItem(createCartItemsDto, addItemDto.bookId);
+        await this.cartItems.createItem(createCartItemsDto);
         return this.db.shoppingCart.findUnique({
           where: { id: addItemDto.shoppingCartId },
           include: { shoppingCartItems: true },
@@ -351,4 +352,6 @@ export class ShoppingCartService {
       throw new ConflictException();
     }
   }
+
+  //async createShippingPackage(shoppingCartId: number): Promise<ShippingPackageDto> {};
 }

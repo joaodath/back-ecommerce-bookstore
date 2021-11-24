@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ShoppingCartItems } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BooksService } from 'src/books/books.service';
 import { CreateCartItemsDto } from './dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
+import { ShippingPackageBasicDto } from 'src/cep/dto/shipping-package.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
@@ -11,28 +12,31 @@ export class ShoppingCartItemsService {
 
   async createItem(
     createCartItemDto: CreateCartItemsDto,
-    bookId: number,
   ): Promise<ShoppingCartItems> {
-    const bookObject = await this.book.findUnique(bookId);
-    const bookPrice =
-      bookObject.discountCheck === true
-        ? bookObject.discountedPrice
-        : bookObject.price;
-    const totalPrice = bookPrice * createCartItemDto.quantity;
+    const bookObject = await this.book.findUnique(createCartItemDto.bookId);
+    if (bookObject) {
+      const bookPrice =
+        bookObject.discountCheck === true
+          ? bookObject.discountedPrice
+          : bookObject.price;
+      const totalPrice = bookPrice * createCartItemDto.quantity;
 
-    return await this.db.shoppingCartItems.create({
-      data: {
-        ...createCartItemDto,
-        price: bookPrice,
-        totalPrice: totalPrice,
-        shoppingCart: {
-          connect: { id: createCartItemDto.shoppingCartId },
+      return await this.db.shoppingCartItems.create({
+        data: {
+          ...createCartItemDto,
+          price: bookPrice,
+          totalPrice: totalPrice,
+          shoppingCart: {
+            connect: { id: createCartItemDto.shoppingCartId },
+          },
+          book: {
+            connect: { id: createCartItemDto.bookId },
+          },
         },
-        book: {
-          connect: { id: bookId },
-        },
-      },
-    });
+      });
+    } else {
+      throw new NotFoundException();
+    }
   }
 
   async findAll(): Promise<ShoppingCartItems[]> {
@@ -65,6 +69,9 @@ export class ShoppingCartItemsService {
   async findMany(shoppingCartId: number): Promise<ShoppingCartItems[]> {
     return await this.db.shoppingCartItems.findMany({
       where: { shoppingCartId: shoppingCartId },
+      include: {
+        book: true,
+      },
     });
   }
 
@@ -170,4 +177,13 @@ export class ShoppingCartItemsService {
   async removeItem(id: number): Promise<ShoppingCartItems> {
     return await this.db.shoppingCartItems.delete({ where: { id } });
   }
+
+  // async createShippingPackage(
+  //   shoppingCartId: number,
+  // ): Promise<ShippingPackageBasicDto> {
+  //   const cartItems = await this.findMany(shoppingCartId);
+  //   for (const uniqueCartItem of cartItems) {
+  //     const bookId = uniqueCartItem.book.id;
+  //   }
+  // }
 }
