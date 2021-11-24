@@ -25,7 +25,13 @@ export class BooksService {
   }
 
   async findAll(): Promise<Books[]> {
-    return await this.db.books.findMany();
+    return await this.db.books.findMany({
+      include: {
+        author: true,
+        publisher: true,
+        category: true,
+      },
+    });
   }
 
   async findUnique(id: number): Promise<Books> {
@@ -93,7 +99,12 @@ export class BooksService {
   }
 
   async remove(id: number): Promise<Books> {
-    return await this.db.books.delete({ where: { id } });
+    try {
+      const deleteOperation = await this.db.books.delete({ where: { id } });
+      return deleteOperation;
+    } catch (err) {
+      throw new NotFoundException();
+    }
   }
 
   async addCategory(addCategory: AddBookCategoryDto): Promise<Books> {
