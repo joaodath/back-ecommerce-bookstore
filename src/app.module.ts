@@ -14,6 +14,7 @@ import { CouponCodesModule } from './coupon-codes/coupon-codes.module';
 import { PublisherModule } from './publisher/publisher.module';
 import { CategoryModule } from './category/category.module';
 import { AuthorModule } from './author/author.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AuthorModule } from './author/author.module';
     CartItemsModule,
     CartModule,
     CouponCodesModule,
+    AddressesModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
