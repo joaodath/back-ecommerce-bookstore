@@ -18,6 +18,7 @@ import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
+import { CreateBookDto } from './dto/create-book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -25,7 +26,7 @@ export class BooksController {
 
   @Post('new')
   @UsePipes(ValidationPipe)
-  async create(@Body() createBookDto: Prisma.BooksCreateInput): Promise<Books> {
+  async create(@Body() createBookDto: CreateBookDto): Promise<Books> {
     return await this.booksService.create(createBookDto);
   }
 
