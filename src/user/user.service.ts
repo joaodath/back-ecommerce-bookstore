@@ -81,16 +81,12 @@ export class UserService {
     username: string,
     updateAddressDto: UpdateAddressDto,
   ): Promise<User> {
-    const user = await this.db.user.findUnique({
-      where: { username: username },
+    const address = await this.db.userAddresses.findUnique({
+      where: { id: updateAddressDto.id },
     });
-    const address = await this.db.userAddresses.findUnique([
-      where: { id: id },
-    ]);
     const updateAddress = await this.db.userAddresses.update({
       where: { id: address.id },
       data: {
-        ...updateAddressDto,
         user: {
           connect: address,
         },
@@ -100,6 +96,16 @@ export class UserService {
       where: { username: username },
       include: { userAddresses: true },
     });
+  }
+
+  async removeAddress(
+    username: string,
+    removeAddressDto: RemoveAddressDto,
+  ):Promise<UserAddresses> {
+    const address = await this.db.userAddresses.findUnique({
+      where: { id: removeAddressDto.id },
+    });
+    return await this.userAddresses.removeAddress(removeAddressDto.id);
   }
 
   async findAll(): Promise<User[]> {
