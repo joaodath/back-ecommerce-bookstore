@@ -14,6 +14,8 @@ import { BooksService } from './books.service';
 import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
 import { AddBookCategoryDto } from 'src/category/dto/add-book-category.dto';
 import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
+import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
+import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 
 @Controller('books')
 export class BooksController {
@@ -51,12 +53,6 @@ export class BooksController {
     return await this.booksService.findByPublisher(publisher);
   }
 
-  @Get('/author/:author')
-  @UsePipes(ValidationPipe)
-  async findAuthor(@Param('author') author: string): Promise<Authors[]> {
-    return await this.booksService.findByAuthor(author);
-  }
-
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
@@ -86,6 +82,27 @@ export class BooksController {
     @Body() removeCategoryDto: RemoveBookCategoryDto,
   ): Promise<Books> {
     return await this.booksService.removeCategory(removeCategoryDto);
+  }
+
+  //Rotas de Author
+  @Get('/author/:author')
+  @UsePipes(ValidationPipe)
+  async findAuthor(@Param('author') author: string): Promise<Authors[]> {
+    return await this.booksService.findByAuthor(author);
+  }
+
+  @Post('add/author')
+  @UsePipes(ValidationPipe)
+  async addAuthor(@Body() addAuthorDto: AddBookAuthorDto): Promise<Books> {
+    return await this.booksService.addAuthor(addAuthorDto);
+  }
+
+  @Post('remove/author')
+  @UsePipes(ValidationPipe)
+  async removeAuthor(
+    @Body() removeAuthorDto: RemoveBookAuthorDto,
+  ): Promise<Books> {
+    return await this.booksService.removeAuthor(removeAuthorDto);
   }
 
   @Delete(':id')
