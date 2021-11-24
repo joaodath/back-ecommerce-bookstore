@@ -101,13 +101,13 @@ model Books {
 
 model Authors {
   id    Int     @id @default(autoincrement())
-  name  String
+  name  String @unique
   books Books[]
 }
 
 model Publisher {
   id    Int     @id @default(autoincrement())
-  name  String
+  name  String @unique
   books Books[]
 }
 
