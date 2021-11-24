@@ -16,6 +16,8 @@ import { AddBookCategoryDto } from 'src/category/dto/add-book-category.dto';
 import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
 import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
+import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
+import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 
 @Controller('books')
 export class BooksController {
@@ -43,14 +45,6 @@ export class BooksController {
   @UsePipes(ValidationPipe)
   async findTitle(@Param('title') title: string): Promise<Books[]> {
     return await this.booksService.findByTitle(title);
-  }
-
-  @Get('/publisher/:publisher')
-  @UsePipes(ValidationPipe)
-  async findPublisher(
-    @Param('publisher') publisher: string,
-  ): Promise<Publisher[]> {
-    return await this.booksService.findByPublisher(publisher);
   }
 
   @Patch(':id')
@@ -103,6 +97,31 @@ export class BooksController {
     @Body() removeAuthorDto: RemoveBookAuthorDto,
   ): Promise<Books> {
     return await this.booksService.removeAuthor(removeAuthorDto);
+  }
+
+  //Rotas de Publisher
+  @Get('/publisher/:publisher')
+  @UsePipes(ValidationPipe)
+  async findPublisher(
+    @Param('publisher') publisher: string,
+  ): Promise<Publisher[]> {
+    return await this.booksService.findByPublisher(publisher);
+  }
+
+  @Post('add/publisher')
+  @UsePipes(ValidationPipe)
+  async addPublisher(
+    @Body() addPublisherDto: AddBookPublisherDto,
+  ): Promise<Books> {
+    return await this.booksService.addPublisher(addPublisherDto);
+  }
+
+  @Post('remove/publisher')
+  @UsePipes(ValidationPipe)
+  async removePublisher(
+    @Body() removePublisherDto: RemoveBookPublisherDto,
+  ): Promise<Books> {
+    return await this.booksService.removePublisher(removePublisherDto);
   }
 
   @Delete(':id')
