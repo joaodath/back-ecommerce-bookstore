@@ -1,6 +1,9 @@
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class UpdateAddressDto {
+  @IsNumber()
+  id: number;
+
   @IsString()
   username?: string;
 
