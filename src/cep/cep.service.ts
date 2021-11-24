@@ -43,9 +43,7 @@ export class CepService {
     }
   }
 
-  async calculateShippingPriceAndDeliveryEstimate(): Promise<ReturnShippingPriceDeliveryDto> {
-    
-  };
+  //async calculateShippingPriceAndDeliveryEstimate(): Promise<ReturnShippingPriceDeliveryDto> {};
 
   findOne(id: number) {
     return `This action returns a #${id} cep`;
