@@ -5,13 +5,20 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Prisma, User } from '.prisma/client';
+import { Prisma, User, UserAddresses } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
+import { AddAddressDto } from './dto/add-address.dto';
+import { Address } from 'src/addresses/entities/address.entity';
+import { threadId } from 'worker_threads';
+import { AddItemDto } from 'src/cart/dto/add-item.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
+import { AddressesService } from 'src/addresses/addresses.service';
+import { RemoveAddressDto } from './dto/remove-address.dto';
 @Injectable()
 export class UserService {
-  constructor(private db: PrismaService) {}
+  constructor(private db: PrismaService, private userAddresses: AddressesService) {}
   async create(createUserDto: Prisma.UserCreateInput): Promise<User> {
     const usernameExists = await this.db.user.findUnique({
       where: { username: createUserDto.username },
@@ -41,6 +48,57 @@ export class UserService {
         ...createUserDto,
         password: hashedPassword,
       },
+    });
+  }
+
+  async addAddress(
+    username: string,
+    addAddressDto: AddAddressDto,
+  ): Promise<User> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    const userId = user.username;
+    const address = await this.db.userAddresses.create({
+      data: addAddressDto,
+    });
+    await this.db.userAddresses.update({
+      where: { username: userId },
+      data: {
+        ...addAddressDto,
+        user: {
+          connect: address,
+        },
+      },
+    });
+    return await this.db.user.findUnique({
+      where: { username: username },
+      include: { userAddresses: true },
+    });
+  }
+
+  async updateAddress(
+    username: string,
+    updateAddressDto: UpdateAddressDto,
+  ): Promise<User> {
+    const user = await this.db.user.findUnique({
+      where: { username: username },
+    });
+    const address = await this.db.userAddresses.findUnique([
+      where: { id: id },
+    ]);
+    const updateAddress = await this.db.userAddresses.update({
+      where: { id: address.id },
+      data: {
+        ...updateAddressDto,
+        user: {
+          connect: address,
+        },
+      },
+    });
+    return await this.db.user.findUnique({
+      where: { username: username },
+      include: { userAddresses: true },
     });
   }
 
