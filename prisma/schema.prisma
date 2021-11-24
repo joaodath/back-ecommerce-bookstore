@@ -85,8 +85,8 @@ model Books {
   width                Int                   @default(0)
   length               Int                   @default(0)
   weight               Int                   @default(0)
-  isbn13               Int                   @unique @default(0)
-  isbn10               Int                   @unique @default(0)
+  isbn13               String                
+  isbn10               String                
   score                Float                 @default(0)
   price                Float
   discountedPrice      Float?
@@ -101,13 +101,13 @@ model Books {
 
 model Authors {
   id    Int     @id @default(autoincrement())
-  name  String
+  name  String @unique
   books Books[]
 }
 
 model Publisher {
   id    Int     @id @default(autoincrement())
-  name  String
+  name  String @unique
   books Books[]
 }
 
