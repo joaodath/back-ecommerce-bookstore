@@ -21,6 +21,7 @@ import { UpdateItemDto } from './dto/update-item.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader } from '@nestjs/swagger';
 
 @ApiTags('Cart')
 @Controller('cart')
@@ -35,6 +36,10 @@ export class CartController {
   //   return await this.cartService.createCart(createCartDto);
   // }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -54,6 +59,10 @@ export class CartController {
     return await this.cartService.createAnonCart();
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Post('new/user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -67,6 +76,10 @@ export class CartController {
     );
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Post('user/item/add')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -77,6 +90,10 @@ export class CartController {
     return await this.cartService.addItemUser(req.user.username, addItemDto);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Patch('user/item/update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -104,6 +121,10 @@ export class CartController {
     return await this.cartService.updateItemAnon(updateItemDto);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Delete('user/item/delete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
