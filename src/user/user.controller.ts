@@ -13,9 +13,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma, User } from '.prisma/client';
+import { Prisma, User, UserAddresses } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
+import { AddAddressDto } from './dto/add-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
+import { RemoveAddressDto } from './dto/remove-address.dto';
 
 @Controller('user')
 export class UserController {
@@ -44,6 +47,42 @@ export class UserController {
   @UsePipes(ValidationPipe)
   async findByUsername(@Request() req): Promise<userWithoutPasswordDto> {
     return await this.userService.findByUsername(req.user.username);
+  }
+
+  @Post('address/add')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async addAddress(
+    @Request() req,
+    @Body() addAddressDto: AddAddressDto,
+  ): Promise<User> {
+    return await this.userService.addAddress(req.user.username, addAddressDto);
+  }
+
+  @Patch('address/update')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async updateAddress(
+    @Request() req,
+    @Body() updateAddressDto: UpdateAddressDto,
+  ): Promise<User> {
+    return await this.userService.updateAddress(
+      req.user.username,
+      updateAddressDto,
+    );
+  }
+
+  @Delete('address/delete')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(ValidationPipe)
+  async removeAddress(
+    @Request() req,
+    @Body() removeAddressDto: RemoveAddressDto,
+  ): Promise<UserAddresses> {
+    return await this.userService.removeAddress(
+      req.user.username,
+      removeAddressDto,
+    );
   }
 
   @Patch(':id')
