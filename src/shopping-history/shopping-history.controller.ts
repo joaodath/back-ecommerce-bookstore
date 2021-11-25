@@ -12,7 +12,9 @@ import {
 } from '@nestjs/common';
 import { ShoppingHistoryService } from './shopping-history.service';
 import { Prisma, ShoppingHistory } from '.prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Shopping-History')
 @Controller('shopping-history')
 export class ShoppingHistoryController {
   constructor(
