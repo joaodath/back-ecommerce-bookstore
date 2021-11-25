@@ -16,7 +16,9 @@ import { Publisher } from '.prisma/client';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
 import { UpdatePublisherDto } from './dto/update-publisher.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Publisher')
 @Controller('publisher')
 export class PublisherController {
   constructor(private readonly publisherService: PublisherService) {}
