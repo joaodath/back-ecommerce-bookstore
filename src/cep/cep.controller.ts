@@ -12,7 +12,9 @@ import { CreateCepDto } from './dto/create-cep.dto';
 import { FindCepDto } from './dto/find-cep-dto';
 import { ReturnCepDto } from './dto/return-cep.dto';
 import { UpdateCepDto } from './dto/update-cep.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Cep')
 @Controller('cep')
 export class CepController {
   constructor(private readonly cepService: CepService) {}
