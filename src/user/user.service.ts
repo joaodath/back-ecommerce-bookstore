@@ -18,7 +18,10 @@ import { AddressesService } from 'src/addresses/addresses.service';
 import { RemoveAddressDto } from './dto/remove-address.dto';
 @Injectable()
 export class UserService {
-  constructor(private db: PrismaService, private userAddresses: AddressesService) {}
+  constructor(
+    private db: PrismaService,
+    private userAddresses: AddressesService,
+  ) {}
   async create(createUserDto: Prisma.UserCreateInput): Promise<User> {
     const usernameExists = await this.db.user.findUnique({
       where: { username: createUserDto.username },
@@ -54,27 +57,30 @@ export class UserService {
   async addAddress(
     username: string,
     addAddressDto: AddAddressDto,
-  ): Promise<User> {
-    const user = await this.db.user.findUnique({
-      where: { username: username },
-    });
-    const userId = user.username;
+  ): Promise<userWithoutPasswordDto> {
+    // const user = await this.db.user.findUnique({
+    //   where: { username: username },
+    // });
+    // const userId = user.username;
     const address = await this.db.userAddresses.create({
       data: addAddressDto,
     });
     await this.db.userAddresses.update({
-      where: { username: userId },
+      where: { id: address.id },
       data: {
-        ...addAddressDto,
         user: {
-          connect: address,
+          connect: {
+            username: username,
+          },
         },
       },
     });
-    return await this.db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { username: username },
       include: { userAddresses: true },
     });
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async updateAddress(
@@ -101,7 +107,7 @@ export class UserService {
   async removeAddress(
     username: string,
     removeAddressDto: RemoveAddressDto,
-  ):Promise<UserAddresses> {
+  ): Promise<UserAddresses> {
     const address = await this.db.userAddresses.findUnique({
       where: { id: removeAddressDto.id },
     });
@@ -123,6 +129,14 @@ export class UserService {
   async findByUsername(username: string): Promise<userWithoutPasswordDto> {
     const user = await this.db.user.findUnique({
       where: { username: username },
+      include: {
+        userAddresses: true,
+        shoppingCart: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
     if (!user) {
       throw new NotFoundException();
