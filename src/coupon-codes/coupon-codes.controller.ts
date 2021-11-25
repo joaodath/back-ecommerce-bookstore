@@ -11,7 +11,9 @@ import {
 } from '@nestjs/common';
 import { CouponCodesService } from './coupon-codes.service';
 import { Prisma, CouponCodes } from '.prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Coupon-Codes')
 @Controller('coupon-codes')
 export class CouponCodesController {
   constructor(private readonly couponCodesService: CouponCodesService) {}
