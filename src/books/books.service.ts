@@ -38,27 +38,19 @@ export class BooksService {
           throw new Error('eBook can not have dimensions');
         }
       }
-      const {
-        authorId,
-        author,
-        publisherId,
-        publisher,
-        categoryId,
-        category,
-        ...bookData
-      } = createBookDto;
+      const { author, publisher, category, ...bookData } = createBookDto;
       const bookCreated = await this.db.books.create({ data: bookData });
       if (!bookCreated) {
         throw new Error('Book not created. Try again.');
       }
 
-      if (createBookDto.authorId && createBookDto.author) {
+      if (createBookDto.author) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             author: {
               connectOrCreate: {
-                where: { id: createBookDto.authorId },
+                where: { name: createBookDto.author },
                 create: { name: createBookDto.author },
               },
             },
@@ -66,13 +58,13 @@ export class BooksService {
         });
       }
 
-      if (createBookDto.categoryId && createBookDto.category) {
+      if (createBookDto.category) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             category: {
               connectOrCreate: {
-                where: { id: createBookDto.categoryId },
+                where: { name: createBookDto.category },
                 create: { name: createBookDto.category },
               },
             },
@@ -80,13 +72,13 @@ export class BooksService {
         });
       }
 
-      if (createBookDto.publisherId && createBookDto.publisher) {
+      if (createBookDto.publisher) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             publisher: {
               connectOrCreate: {
-                where: { id: createBookDto.publisherId },
+                where: { name: createBookDto.publisher },
                 create: { name: createBookDto.publisher },
               },
             },
