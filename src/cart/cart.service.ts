@@ -66,40 +66,83 @@ export class ShoppingCartService {
   ): Promise<ShoppingCart> {
     const isThereACart = await this.db.shoppingCart.findUnique({
       where: { username: username },
+      include: {
+        user: {
+          select: {
+            name: true,
+            username: true,
+          },
+        },
+        couponCode: true,
+        shoppingCartItems: true,
+      },
     });
+    console.log(isThereACart);
     if (isThereACart) {
       if (createUserCartDto.cartId) {
+        // if there is a cart for the user and a cartId is passed, update the cart
         const cartItems = await this.cartItems.findMany(
           createUserCartDto.cartId,
         );
         for (const singleCartItem of cartItems) {
-          await this.cartItems.connectNewOwner(
-            singleCartItem.id,
-            isThereACart.id,
+          const checkCartItem = await this.findUnique(
+            singleCartItem.shoppingCartId,
           );
+          if (checkCartItem.isAnonymous === true) {
+            await this.cartItems.connectNewOwner(
+              singleCartItem.id,
+              isThereACart.id,
+            );
+          }
         }
       } else {
+        // if there is a cart for the user and no cartId is passed, return the cart
         return isThereACart;
       }
     } else {
+      // if there is no cart for the user, create a new cart
       const newCart = await this.db.shoppingCart.create({
         data: {
+          username: username,
           isAnonymous: false,
-        },
-      });
-      return await this.db.shoppingCart.update({
-        where: { id: newCart.id },
-        data: {
           user: {
             connect: {
               username: username,
             },
           },
         },
+      });
+
+      if (createUserCartDto.cartId) {
+        // if there's a cartId, connect the new cart as owner of the cart items
+        const cartItems = await this.cartItems.findMany(
+          createUserCartDto.cartId,
+        );
+        for (const singleCartItem of cartItems) {
+          const checkCartItem = await this.findUnique(
+            singleCartItem.shoppingCartId,
+          );
+          if (checkCartItem.isAnonymous === true) {
+            await this.cartItems.connectNewOwner(singleCartItem.id, newCart.id);
+          }
+        }
+      }
+
+      const userCartReady = await this.db.shoppingCart.findUnique({
+        where: { id: newCart.id },
         include: {
+          user: {
+            select: {
+              name: true,
+              username: true,
+            },
+          },
+          couponCode: true,
           shoppingCartItems: true,
         },
       });
+      console.log(userCartReady);
+      return userCartReady;
     }
   }
 
