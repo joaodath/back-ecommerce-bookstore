@@ -24,33 +24,6 @@ export class ShoppingCartService {
     private book: BooksService,
   ) {}
 
-  // async createCart(
-  //   createCartDto: Prisma.ShoppingCartCreateInput,
-  // ): Promise<ShoppingCart> {
-  //   if (createCartDto.username) {
-  //     const newCart = await this.db.shoppingCart.create({
-  //       data: {
-  //         ...createCartDto,
-  //         isAnonymous: false,
-  //       },
-  //     });
-  //     return await this.db.shoppingCart.update({
-  //       where: { id: newCart.id },
-  //       data: {
-  //         user: {
-  //           connect: {
-  //             username: createCartDto.username,
-  //           },
-  //         },
-  //       },
-  //     });
-  //   } else {
-  //     return await this.db.shoppingCart.create({
-  //       data: { ...createCartDto, isAnonymous: true },
-  //     });
-  //   }
-  // }
-
   async createAnonCart(): Promise<ShoppingCart> {
     const newCart = await this.db.shoppingCart.create({
       data: {
@@ -77,7 +50,6 @@ export class ShoppingCartService {
         shoppingCartItems: true,
       },
     });
-    console.log(isThereACart);
     if (isThereACart) {
       if (createUserCartDto.cartId) {
         // if there is a cart for the user and a cartId is passed, update the cart
@@ -209,11 +181,15 @@ export class ShoppingCartService {
       if (shoppingCart.isAnonymous === true) {
         return shoppingCart;
       } else {
-        throw new ConflictException();
+        throw new ConflictException('Not anonymous');
       }
     } else {
       throw new NotFoundException();
     }
+  }
+
+  async getAllCarts(): Promise<ShoppingCart[]> {
+    return await this.db.shoppingCart.findMany();
   }
 
   async addItemUser(
