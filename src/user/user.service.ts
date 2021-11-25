@@ -86,31 +86,32 @@ export class UserService {
   async updateAddress(
     username: string,
     updateAddressDto: UpdateAddressDto,
-  ): Promise<User> {
+  ): Promise<userWithoutPasswordDto> {
     const address = await this.db.userAddresses.findUnique({
       where: { id: updateAddressDto.id },
     });
-    const updateAddress = await this.db.userAddresses.update({
+    await this.db.userAddresses.update({
       where: { id: address.id },
       data: {
         user: {
-          connect: address,
+          connect: {
+            username: username,
+          },
         },
       },
     });
-    return await this.db.user.findUnique({
+    const user = await this.db.user.findUnique({
       where: { username: username },
       include: { userAddresses: true },
     });
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async removeAddress(
     username: string,
     removeAddressDto: RemoveAddressDto,
   ): Promise<UserAddresses> {
-    const address = await this.db.userAddresses.findUnique({
-      where: { id: removeAddressDto.id },
-    });
     return await this.userAddresses.removeAddress(removeAddressDto.id);
   }
 

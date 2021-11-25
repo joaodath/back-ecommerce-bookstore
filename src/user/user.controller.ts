@@ -22,6 +22,7 @@ import { RemoveAddressDto } from './dto/remove-address.dto';
 
 @Controller('user')
 export class UserController {
+  userWithoutPasswordDto: any;
   constructor(private readonly userService: UserService) {}
 
   @Post('new')
@@ -56,7 +57,10 @@ export class UserController {
     @Request() req,
     @Body() addAddressDto: AddAddressDto,
   ): Promise<User> {
-    return await this.userService.addAddress(req.user.username, addAddressDto);
+    return await this.userWithoutPasswordDto.addAddress(
+      req.user.username,
+      addAddressDto,
+    );
   }
 
   @Patch('address/update')
@@ -66,7 +70,7 @@ export class UserController {
     @Request() req,
     @Body() updateAddressDto: UpdateAddressDto,
   ): Promise<User> {
-    return await this.userService.updateAddress(
+    return await this.userWithoutPasswordDto.updateAddress(
       req.user.username,
       updateAddressDto,
     );

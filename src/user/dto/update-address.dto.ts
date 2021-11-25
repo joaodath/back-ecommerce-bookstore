@@ -1,12 +1,10 @@
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateAddressDto {
   @IsNumber()
   id: number;
 
-  @IsString()
-  username?: string;
-
+  @IsOptional()
   @IsBoolean()
   isMain: boolean;
 
