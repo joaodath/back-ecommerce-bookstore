@@ -52,6 +52,7 @@ export class CartController {
     return await this.cartService.getCartUser(req.user.username);
   }
 
+  @ApiResponse({ status: 200, description: 'Retorna todos os carrinhos' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async getAllCarts(): Promise<ShoppingCart[]> {
