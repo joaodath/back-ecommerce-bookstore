@@ -1,0 +1,11 @@
+-- DropIndex
+DROP INDEX "Books_isbn10_key";
+
+-- DropIndex
+DROP INDEX "Books_isbn13_key";
+
+-- AlterTable
+ALTER TABLE "Books" ALTER COLUMN "isbn13" DROP DEFAULT,
+ALTER COLUMN "isbn13" SET DATA TYPE TEXT,
+ALTER COLUMN "isbn10" DROP DEFAULT,
+ALTER COLUMN "isbn10" SET DATA TYPE TEXT;

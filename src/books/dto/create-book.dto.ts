@@ -1,4 +1,11 @@
-import { IsString, IsUrl, Length, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsUrl,
+  Length,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateBookDto {
   @IsString()
@@ -19,42 +26,64 @@ export class CreateBookDto {
   @IsUrl()
   coverImg: string;
 
+  @IsOptional()
   @IsBoolean()
-  ebook: boolean;
+  ebook?: boolean;
 
+  @IsOptional()
   @IsBoolean()
-  hardCover: boolean;
+  hardCover?: boolean;
 
+  @IsOptional()
   @IsNumber()
-  height: number;
+  height?: number;
 
+  @IsOptional()
   @IsNumber()
-  width: number;
+  width?: number;
 
+  @IsOptional()
   @IsNumber()
-  length: number;
+  length?: number;
 
+  @IsOptional()
   @IsNumber()
-  weight: number;
+  weight?: number;
 
-  @IsNumber()
-  isbn13: number;
+  @IsString()
+  isbn13: string;
 
-  @IsNumber()
-  isbn10: number;
+  @IsString()
+  isbn10: string;
 
+  @IsOptional()
   @IsNumber()
-  score: number;
+  score?: number;
 
   @IsNumber()
   price: number;
 
+  @IsOptional()
   @IsNumber()
-  discountedPrice: number;
+  discountedPrice?: number;
 
+  @IsOptional()
   @IsBoolean()
-  discountCheck: boolean;
+  discountCheck?: boolean;
 
+  @IsOptional()
   @IsNumber()
-  inventoryAmount: number;
+  inventoryAmount?: number;
+
+  @IsOptional()
+  @IsString()
+  author?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  publisher?: string;
 }

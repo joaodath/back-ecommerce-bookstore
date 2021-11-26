@@ -22,7 +22,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post('new')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
@@ -49,7 +49,7 @@ export class CategoryController {
   }
 
   @Patch('/update/:id')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -58,8 +58,8 @@ export class CategoryController {
     return await this.categoryService.update(id, updateCategoryDto);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Category> {
     return await this.categoryService.remove(id);

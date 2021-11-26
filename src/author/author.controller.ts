@@ -22,7 +22,7 @@ export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
   @Post('new')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(@Body() createAuthorDto: CreateAuthorDto): Promise<Authors> {
     return await this.authorService.create(createAuthorDto);
@@ -47,7 +47,7 @@ export class AuthorController {
   }
 
   @Patch('/update/:id')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -56,8 +56,8 @@ export class AuthorController {
     return await this.authorService.update(id, updateAuthorDto);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
     return await this.authorService.remove(id);

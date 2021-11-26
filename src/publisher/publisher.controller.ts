@@ -22,7 +22,7 @@ export class PublisherController {
   constructor(private readonly publisherService: PublisherService) {}
 
   @Post('new')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async create(
     @Body() createPublisherDto: CreatePublisherDto,
@@ -36,20 +36,20 @@ export class PublisherController {
     return this.publisherService.findAll();
   }
 
-  @Get('/id/:id')
+  @Get('id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Publisher> {
     return this.publisherService.findUnique(id);
   }
 
-  @Get('/name/:name')
+  @Get('name/:name')
   @UsePipes(ValidationPipe)
   async findName(@Param('name') name: string): Promise<Publisher[]> {
     return await this.publisherService.findByName(name);
   }
 
-  @Patch('/update/:id')
-  @UseGuards(JwtAuthGuard)
+  @Patch('update/:id')
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -58,8 +58,8 @@ export class PublisherController {
     return this.publisherService.update(id, updatePublisherDto);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @Delete('delete/:id')
+  //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.publisherService.remove(id);
