@@ -9,6 +9,7 @@ import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -17,6 +18,7 @@ export class AuthController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @ApiHeader({
     name: 'Authorization',
     description: 'JWT Token',

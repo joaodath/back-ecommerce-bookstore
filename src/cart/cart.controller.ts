@@ -43,6 +43,7 @@ export class CartController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -50,6 +51,10 @@ export class CartController {
     return await this.cartService.getCartUser(req.user.username);
   }
 
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('anon')
   @UsePipes(ValidationPipe)
@@ -61,6 +66,7 @@ export class CartController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('new/anon')
   @UsePipes(ValidationPipe)
   async createAnonCart(): Promise<ShoppingCart> {
@@ -72,6 +78,7 @@ export class CartController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new/user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -90,6 +97,7 @@ export class CartController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('user/item/add')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -105,6 +113,7 @@ export class CartController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('user/item/update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -119,6 +128,7 @@ export class CartController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('anon/item/add')
   @UsePipes(ValidationPipe)
   async addItemAnon(@Body() addItemDto: AddItemDto): Promise<ShoppingCart> {
@@ -126,6 +136,7 @@ export class CartController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('anon/item/update')
   @UsePipes(ValidationPipe)
   async updateItemAnon(
@@ -139,6 +150,7 @@ export class CartController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('user/item/delete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -153,6 +165,7 @@ export class CartController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('anon/item/delete')
   @UsePipes(ValidationPipe)
   async deleteItemAnon(

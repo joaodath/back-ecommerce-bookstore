@@ -23,6 +23,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 export class PublisherController {
   constructor(private readonly publisherService: PublisherService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   //@UseGuards(JwtAuthGuard)
@@ -34,6 +35,7 @@ export class PublisherController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Publisher[]> {
@@ -41,6 +43,7 @@ export class PublisherController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Publisher> {
@@ -48,6 +51,7 @@ export class PublisherController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('name/:name')
   @UsePipes(ValidationPipe)
   async findName(@Param('name') name: string): Promise<Publisher[]> {
@@ -55,6 +59,7 @@ export class PublisherController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('update/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -66,6 +71,7 @@ export class PublisherController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('delete/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)

@@ -23,6 +23,7 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   //@UseGuards(JwtAuthGuard)
@@ -32,6 +33,7 @@ export class AuthorController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Authors[]> {
@@ -39,6 +41,7 @@ export class AuthorController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
@@ -46,6 +49,7 @@ export class AuthorController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/name/:name')
   @UsePipes(ValidationPipe)
   async findName(@Param('name') name: string): Promise<Authors[]> {
@@ -53,6 +57,7 @@ export class AuthorController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('/update/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -64,6 +69,7 @@ export class AuthorController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('delete/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)

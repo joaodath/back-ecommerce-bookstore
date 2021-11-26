@@ -29,10 +29,7 @@ export class UserController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
-  @ApiResponse({
-    status: 409,
-    description: 'Conflito de dados. Revise dados enviados.',
-  })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -46,6 +43,7 @@ export class UserController {
     }
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
@@ -57,6 +55,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -66,6 +65,7 @@ export class UserController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('username/:username')
   // @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -80,6 +80,7 @@ export class UserController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -95,6 +96,7 @@ export class UserController {
     description: 'JWT Token',
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('disable')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -106,6 +108,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('softdelete')
   @UseGuards(JwtAuthGuard)
@@ -114,6 +117,7 @@ export class UserController {
     return await this.userService.softDelete(req.user.username);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('del/:username')
   @UsePipes(ValidationPipe)

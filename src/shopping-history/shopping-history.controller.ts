@@ -21,6 +21,7 @@ export class ShoppingHistoryController {
     private readonly shoppingHistoryService: ShoppingHistoryService,
   ) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
@@ -30,6 +31,7 @@ export class ShoppingHistoryController {
     return await this.shoppingHistoryService.create(createShoppingHistoryDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
@@ -37,6 +39,7 @@ export class ShoppingHistoryController {
     return await this.shoppingHistoryService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
@@ -46,6 +49,7 @@ export class ShoppingHistoryController {
     return await this.shoppingHistoryService.findUnique(id);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch(':id')
   @UsePipes(ValidationPipe)
@@ -59,6 +63,7 @@ export class ShoppingHistoryController {
     );
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete(':id')
   @UsePipes(ValidationPipe)

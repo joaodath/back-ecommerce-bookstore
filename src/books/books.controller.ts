@@ -30,12 +30,14 @@ export class BooksController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(@Body() createBookDto: CreateBookDto): Promise<Books> {
     return await this.booksService.create(createBookDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
@@ -43,6 +45,7 @@ export class BooksController {
     return await this.booksService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
@@ -50,6 +53,7 @@ export class BooksController {
     return this.booksService.findUnique(id);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/title/:title')
   @UsePipes(ValidationPipe)
@@ -57,6 +61,7 @@ export class BooksController {
     return await this.booksService.findByTitle(title);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch(':id')
   @UsePipes(ValidationPipe)
@@ -68,6 +73,7 @@ export class BooksController {
   }
 
   //Rotas de Categoria
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/category/:category')
   @UsePipes(ValidationPipe)
@@ -76,6 +82,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('add/category')
   @UsePipes(ValidationPipe)
   async addCategory(
@@ -85,6 +92,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('remove/category')
   async removeCategory(
     @Body() removeCategoryDto: RemoveBookCategoryDto,
@@ -93,6 +101,7 @@ export class BooksController {
   }
 
   //Rotas de Author
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/author/:author')
   @UsePipes(ValidationPipe)
@@ -101,6 +110,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('add/author')
   @UsePipes(ValidationPipe)
   async addAuthor(@Body() addAuthorDto: AddBookAuthorDto): Promise<Books> {
@@ -108,6 +118,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('remove/author')
   @UsePipes(ValidationPipe)
   async removeAuthor(
@@ -117,6 +128,7 @@ export class BooksController {
   }
 
   //Rotas de Publisher
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/publisher/:publisher')
   @UsePipes(ValidationPipe)
@@ -127,6 +139,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('add/publisher')
   @UsePipes(ValidationPipe)
   async addPublisher(
@@ -136,6 +149,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('remove/publisher')
   @UsePipes(ValidationPipe)
   async removePublisher(
@@ -145,6 +159,7 @@ export class BooksController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Books> {

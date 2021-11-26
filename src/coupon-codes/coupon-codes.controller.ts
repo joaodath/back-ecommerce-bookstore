@@ -18,6 +18,7 @@ import { ApiTags, ApiResponse } from '@nestjs/swagger';
 export class CouponCodesController {
   constructor(private readonly couponCodesService: CouponCodesService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
@@ -27,6 +28,7 @@ export class CouponCodesController {
     return await this.couponCodesService.create(createCouponCodeDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
@@ -34,6 +36,7 @@ export class CouponCodesController {
     return await this.couponCodesService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/code/:code')
   @UsePipes(ValidationPipe)
@@ -41,6 +44,7 @@ export class CouponCodesController {
     return this.couponCodesService.findUnique(code);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch(':code')
   @UsePipes(ValidationPipe)
@@ -51,6 +55,7 @@ export class CouponCodesController {
     return this.couponCodesService.update(code, updateCouponCodeDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete(':code')
   @UsePipes(ValidationPipe)
