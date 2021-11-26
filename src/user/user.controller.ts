@@ -17,8 +17,7 @@ import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
-import { ApiHeader, ApiResponse } from '@nestjs/swagger';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('User')
@@ -26,6 +25,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @ApiResponse({
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
@@ -43,6 +46,7 @@ export class UserController {
     }
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<User[]> {
@@ -53,6 +57,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get()
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -60,6 +65,7 @@ export class UserController {
     return await this.userService.findByUsername(req.user.username);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Get('username/:username')
   // @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -73,6 +79,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -87,6 +94,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Patch('disable')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -98,6 +106,7 @@ export class UserController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('softdelete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -105,6 +114,7 @@ export class UserController {
     return await this.userService.softDelete(req.user.username);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('del/:username')
   @UsePipes(ValidationPipe)
   async remove(@Param('username') username: string): Promise<User> {
