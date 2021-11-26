@@ -17,7 +17,7 @@ import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
-import { ApiHeader, ApiBody } from '@nestjs/swagger';
+import { ApiHeader, ApiResponse } from '@nestjs/swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -26,7 +26,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  //@ApiBody({ type: [Prisma.UserCreateInput]})
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
