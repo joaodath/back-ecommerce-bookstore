@@ -47,7 +47,7 @@ export class ShoppingCartItemsService {
     array: ShoppingCartItems[],
     id: number,
   ): ShoppingCartItems | undefined {
-    return array.find((item) => item.id === id);
+    return array.find((item) => item.bookId === id);
   }
 
   async findManyBookId(
@@ -57,7 +57,12 @@ export class ShoppingCartItemsService {
     const cartItem = await this.db.shoppingCartItems.findMany({
       where: { shoppingCartId: shoppingCartId },
     });
+    console.log('findManyBookId: cartItem');
+    console.log(cartItem);
+
     const cartItemBookId = this.findObj(cartItem, bookId);
+    console.log('findManyBookId: cartItemBookId');
+    console.log(cartItemBookId);
 
     if (cartItemBookId) {
       return cartItemBookId;
