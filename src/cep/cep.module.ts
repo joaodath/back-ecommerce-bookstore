@@ -4,6 +4,6 @@ import { CepController } from './cep.controller';
 
 @Module({
   controllers: [CepController],
-  providers: [CepService]
+  providers: [CepService],
 })
 export class CepModule {}

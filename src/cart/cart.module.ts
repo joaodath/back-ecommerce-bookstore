@@ -15,7 +15,14 @@ import { PublisherModule } from 'src/publisher/publisher.module';
 import { PublisherService } from 'src/publisher/publisher.service';
 
 @Module({
-  imports: [PrismaModule, CartItemsModule, BooksModule, AuthorModule, CategoryModule, PublisherModule],
+  imports: [
+    PrismaModule,
+    CartItemsModule,
+    BooksModule,
+    AuthorModule,
+    CategoryModule,
+    PublisherModule,
+  ],
   controllers: [CartController],
   providers: [
     ShoppingCartService,
@@ -24,7 +31,7 @@ import { PublisherService } from 'src/publisher/publisher.service';
     BooksService,
     AuthorService,
     CategoryService,
-    PublisherService
+    PublisherService,
   ],
   exports: [ShoppingCartService],
 })
