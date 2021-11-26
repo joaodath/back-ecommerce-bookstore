@@ -229,6 +229,17 @@ export class ShoppingCartItemsService {
     }
   }
 
+  async calculateTotalPrice(shoppingCartId: number): Promise<number> {
+    const cartItems = await this.findMany(shoppingCartId);
+    let totalPrice = 0;
+    if (cartItems) {
+      cartItems.forEach((item) => {
+        totalPrice += item.totalPrice;
+      });
+    }
+    return totalPrice;
+  }
+
   // async createShippingPackage(
   //   shoppingCartId: number,
   // ): Promise<ShippingPackageBasicDto> {
