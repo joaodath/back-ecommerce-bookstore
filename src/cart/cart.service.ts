@@ -24,6 +24,18 @@ export class ShoppingCartService {
     private book: BooksService,
   ) {}
 
+  async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
+    const totalCartPrice = await this.cartItems.calculateTotalPrice(
+      shoppingCartId,
+    );
+    const cartUpdated = await this.db.shoppingCart.update({
+      where: { id: shoppingCartId },
+      data: {
+        totalPrice: totalCartPrice,
+      },
+    });
+    return cartUpdated;
+  }
   async createAnonCart(): Promise<ShoppingCart> {
     const newCart = await this.db.shoppingCart.create({
       data: {
@@ -67,6 +79,7 @@ export class ShoppingCartService {
             );
           }
         }
+        await this.updateTotalCartPrice(isThereACart.id);
       } else {
         // if there is a cart for the user and no cartId is passed, return the cart
         return isThereACart;
@@ -99,7 +112,7 @@ export class ShoppingCartService {
           }
         }
       }
-
+      await this.updateTotalCartPrice(newCart.id);
       const userCartReady = await this.db.shoppingCart.findUnique({
         where: { id: newCart.id },
         include: {
@@ -113,38 +126,41 @@ export class ShoppingCartService {
           shoppingCartItems: true,
         },
       });
-      console.log(userCartReady);
       return userCartReady;
     }
   }
 
   async getCartUser(username: string): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: {
-        username: username,
-      },
-      include: {
-        shoppingCartItems: {
-          include: {
-            book: {
-              select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
+    const isShoppingCart = await this.db.shoppingCart.findUnique({
+      where: { username: username },
+    });
+    if (isShoppingCart) {
+      await this.updateTotalCartPrice(isShoppingCart.id);
+      const shoppingCart = await this.db.shoppingCart.findUnique({
+        where: {
+          username: username,
+        },
+        include: {
+          shoppingCartItems: {
+            include: {
+              book: {
+                select: {
+                  title: true,
+                  author: true,
+                  publisher: true,
+                  coverImg: true,
+                },
               },
             },
           },
-        },
-        couponCode: {
-          select: {
-            code: true,
-            discountAmount: true,
+          couponCode: {
+            select: {
+              code: true,
+              discountAmount: true,
+            },
           },
         },
-      },
-    });
-    if (shoppingCart) {
+      });
       return shoppingCart;
     } else {
       throw new NotFoundException();
@@ -152,39 +168,45 @@ export class ShoppingCartService {
   }
 
   async getCartAnon(getCartDto: GetCartDto): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
+    const isShoppingCart = await this.db.shoppingCart.findUnique({
       where: {
         id: getCartDto.shoppingCartId,
       },
-      include: {
-        shoppingCartItems: {
+    });
+    if (isShoppingCart) {
+      if (isShoppingCart.isAnonymous === true) {
+        await this.updateTotalCartPrice(isShoppingCart.id);
+        const shoppingCart = await this.db.shoppingCart.findUnique({
+          where: {
+            id: getCartDto.shoppingCartId,
+          },
           include: {
-            book: {
+            shoppingCartItems: {
+              include: {
+                book: {
+                  select: {
+                    title: true,
+                    author: true,
+                    publisher: true,
+                    coverImg: true,
+                  },
+                },
+              },
+            },
+            couponCode: {
               select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
+                code: true,
+                discountAmount: true,
               },
             },
           },
-        },
-        couponCode: {
-          select: {
-            code: true,
-            discountAmount: true,
-          },
-        },
-      },
-    });
-    if (shoppingCart) {
-      if (shoppingCart.isAnonymous === true) {
+        });
         return shoppingCart;
       } else {
         throw new ConflictException('Not anonymous');
       }
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('ShoppingCart not found!');
     }
   }
 
@@ -217,17 +239,19 @@ export class ShoppingCartService {
         quantity: addItemDto.quantity,
       };
       await this.cartItems.createItem(createCartItemsDto);
+      await this.updateTotalCartPrice(shoppingCartId.id);
       return this.db.shoppingCart.findUnique({
         where: { id: addItemDto.shoppingCartId },
         include: { shoppingCartItems: true },
       });
     } else {
-      const updateCartItem: UpdateCartItemsDto = {
+      const updateCartItem: CreateCartItemsDto = {
         shoppingCartId: addItemDto.shoppingCartId,
         bookId: addItemDto.bookId,
         quantity: addItemDto.quantity,
       };
-      const cartUpdate = await this.cartItems.updateItem(updateCartItem);
+      const cartUpdate = await this.cartItems.createItem(updateCartItem);
+      await this.updateTotalCartPrice(shoppingCartId.id);
       return await this.findUnique(addItemDto.shoppingCartId);
     }
   }
@@ -254,17 +278,19 @@ export class ShoppingCartService {
           quantity: addItemDto.quantity,
         };
         await this.cartItems.createItem(createCartItemsDto);
+        await this.updateTotalCartPrice(shoppingCart.id);
         return this.db.shoppingCart.findUnique({
           where: { id: addItemDto.shoppingCartId },
           include: { shoppingCartItems: true },
         });
       } else {
-        const updateCartItem: UpdateCartItemsDto = {
+        const updateCartItem: CreateCartItemsDto = {
           shoppingCartId: addItemDto.shoppingCartId,
           bookId: addItemDto.bookId,
           quantity: addItemDto.quantity,
         };
-        const cartUpdate = await this.cartItems.updateItem(updateCartItem);
+        const cartUpdate = await this.cartItems.createItem(updateCartItem);
+        await this.updateTotalCartPrice(shoppingCart.id);
         return await this.findUnique(addItemDto.shoppingCartId);
       }
     } else {
@@ -285,6 +311,7 @@ export class ShoppingCartService {
     );
     if (cartItem) {
       const updateItem = await this.cartItems.updateItem(updateItemDto);
+      await this.updateTotalCartPrice(shoppingCartId.id);
       return await this.findUnique(updateItemDto.shoppingCartId);
     } else {
       throw new NotFoundException();
@@ -301,6 +328,7 @@ export class ShoppingCartService {
       );
       if (cartItem) {
         const updateItem = await this.cartItems.updateItem(updateItemDto);
+        await this.updateTotalCartPrice(shoppingCart.id);
         return await this.findUnique(updateItemDto.shoppingCartId);
       } else {
         throw new NotFoundException();
@@ -333,7 +361,7 @@ export class ShoppingCartService {
   async deleteItemUser(
     username: string,
     deleteItemDto: DeleteItemDto,
-  ): Promise<ShoppingCartItems> {
+  ): Promise<ShoppingCart> {
     const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
@@ -346,13 +374,13 @@ export class ShoppingCartService {
     if (cartItem === -1) {
       throw new NotFoundException();
     } else {
-      return await this.cartItems.removeItem(deleteItemDto.bookId);
+      await this.cartItems.removeItem(deleteItemDto);
+      await this.updateTotalCartPrice(shoppingCart.id);
+      return await this.findUnique(shoppingCart.id);
     }
   }
 
-  async deleteItemAnon(
-    deleteItemDto: DeleteItemDto,
-  ): Promise<ShoppingCartItems> {
+  async deleteItemAnon(deleteItemDto: DeleteItemDto): Promise<ShoppingCart> {
     const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { id: deleteItemDto.shoppingCartId },
     });
@@ -365,7 +393,9 @@ export class ShoppingCartService {
       if (cartItem === -1) {
         throw new NotFoundException();
       } else {
-        return await this.cartItems.removeItem(deleteItemDto.bookId);
+        await this.cartItems.removeItem(deleteItemDto);
+        await this.updateTotalCartPrice(shoppingCart.id);
+        return await this.findUnique(shoppingCart.id);
       }
     } else {
       throw new ConflictException();

@@ -178,7 +178,7 @@ export class CartController {
   async deleteItemUser(
     @Request() req,
     @Body() deleteItemDto: DeleteItemDto,
-  ): Promise<ShoppingCartItems> {
+  ): Promise<ShoppingCart> {
     return await this.cartService.deleteItemUser(
       req.user.username,
       deleteItemDto,
@@ -196,7 +196,7 @@ export class CartController {
   @UsePipes(ValidationPipe)
   async deleteItemAnon(
     @Body() deleteItemDto: DeleteItemDto,
-  ): Promise<ShoppingCartItems> {
+  ): Promise<ShoppingCart> {
     return await this.cartService.deleteItemAnon(deleteItemDto);
   }
 }
