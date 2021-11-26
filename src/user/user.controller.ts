@@ -17,19 +17,21 @@ import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
-import { ApiHeader } from '@nestjs/swagger';
+import { ApiHeader, ApiBody } from '@nestjs/swagger';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  //@ApiBody({ type: [Prisma.UserCreateInput]})
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
     @Request() req,
-    @Body() createUserDto: Prisma.UserCreateInput,
+    @Body() createUserDto: CreateUserDto,
   ): Promise<User> {
     if (req.headers.authorization) {
       throw new ConflictException();
@@ -64,6 +66,10 @@ export class UserController {
     return await this.userService.findByUsername(username);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -74,6 +80,10 @@ export class UserController {
     return await this.userService.update(req.user.username, updateUserDto);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Patch('disable')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -81,6 +91,10 @@ export class UserController {
     return await this.userService.disable(req.user.username);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+  })
   @Patch('softdelete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)

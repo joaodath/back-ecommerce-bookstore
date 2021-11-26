@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDateString,
   IsEmail,
+  IsOptional,
   IsString,
   IsUrl,
   Length,
@@ -28,40 +29,47 @@ export class CreateUserDto {
   @IsString()
   password: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   @IsUrl()
-  profilePhoto: string;
+  profilePhoto?: string;
 
   @ApiProperty()
   @IsDateString()
-  birthDate: string;
+  birthDate: Date | string;
 
   @ApiProperty()
   @IsString()
   cpf: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  cep: string;
+  cep?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  country: string;
+  country?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  state: string;
+  state?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  city: string;
+  city?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  address: string;
+  address?: string;
 
   @ApiProperty()
+  @IsOptional()
   @IsString()
-  phonenumber: string;
+  phonenumber?: string;
 }

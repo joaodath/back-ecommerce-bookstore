@@ -19,7 +19,7 @@ export class UserService {
     return Math.abs(ageDate.getUTCFullYear() - 1970);
   }
 
-  async create(createUserDto: Prisma.UserCreateInput): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const usernameExists = await this.db.user.findUnique({
       where: { username: createUserDto.username },
     });
