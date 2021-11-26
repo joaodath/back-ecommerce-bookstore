@@ -241,6 +241,8 @@ export class ShoppingCartService {
         addItemDto.shoppingCartId,
         addItemDto.bookId,
       );
+      console.log('addItemAnon: cartItem');
+      console.log(cartItem);
       if (cartItem === -1) {
         const bookObject = await this.book.findUnique(addItemDto.bookId);
         const bookPrice =
