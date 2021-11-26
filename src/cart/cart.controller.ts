@@ -40,6 +40,12 @@ export class CartController {
     return await this.cartService.getCartUser(req.user.username);
   }
 
+  @Get('all')
+  @UsePipes(ValidationPipe)
+  async getAllCarts(): Promise<ShoppingCart[]> {
+    return await this.cartService.getAllCarts();
+  }
+
   @Post('anon')
   @UsePipes(ValidationPipe)
   async getCartAnon(@Body() getCartDto: GetCartDto): Promise<ShoppingCart> {
