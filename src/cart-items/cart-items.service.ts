@@ -150,7 +150,7 @@ export class ShoppingCartItemsService {
       return await this.db.shoppingCartItems.update({
         where: { id: cartItem.id },
         data: {
-          ...updateCartItemDto,
+          quantity: updateCartItemDto.quantity,
           price: bookPrice,
           totalPrice: totalPrice,
         },
