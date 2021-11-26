@@ -20,7 +20,6 @@ async function bootstrap() {
       'Projeto de backend para ecommerce desenvolvido no Bootcamp 2021 C005 da Blue Edtech para a OSF.',
     )
     .setVersion('0.5')
-    .addTag('ecommerce')
     .build();
 
   const options: SwaggerDocumentOptions = {
