@@ -22,6 +22,7 @@ model User {
   country         String?
   state           String?
   city            String?
+  neighborhood    String?
   address         String?
   phonenumber     String?
   createdAt       DateTime          @default(now())
