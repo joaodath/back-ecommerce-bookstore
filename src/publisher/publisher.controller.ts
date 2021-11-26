@@ -16,7 +16,7 @@ import { Publisher } from '.prisma/client';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
 import { UpdatePublisherDto } from './dto/update-publisher.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Publisher')
 @Controller('publisher')
@@ -25,6 +25,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar Publisher' })
   @Post('new')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -36,6 +37,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os Publisher' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Publisher[]> {
@@ -44,6 +46,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Publisher por ID' })
   @Get('id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Publisher> {
@@ -52,6 +55,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Publisher pelo Name' })
   @Get('name/:name')
   @UsePipes(ValidationPipe)
   async findName(@Param('name') name: string): Promise<Publisher[]> {
@@ -60,6 +64,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do Publisher' })
   @Patch('update/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -72,6 +77,7 @@ export class PublisherController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar Publisher' })
   @Delete('delete/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)

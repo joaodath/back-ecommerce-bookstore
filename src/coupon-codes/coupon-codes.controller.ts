@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CouponCodesService } from './coupon-codes.service';
 import { Prisma, CouponCodes } from '.prisma/client';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Coupon-Codes')
 @Controller('coupon-codes')
@@ -20,6 +20,7 @@ export class CouponCodesController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar CouponCode' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -30,6 +31,7 @@ export class CouponCodesController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os CouponCode' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<CouponCodes[]> {
@@ -38,6 +40,7 @@ export class CouponCodesController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um CouponCode por ID' })
   @Get('/code/:code')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('code') code: string): Promise<CouponCodes> {
@@ -46,6 +49,7 @@ export class CouponCodesController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do CouponCode' })
   @Patch(':code')
   @UsePipes(ValidationPipe)
   async update(
@@ -57,6 +61,7 @@ export class CouponCodesController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar CouponCode' })
   @Delete(':code')
   @UsePipes(ValidationPipe)
   async remove(@Param('code') code: string): Promise<CouponCodes> {

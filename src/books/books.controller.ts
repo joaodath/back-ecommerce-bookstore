@@ -19,7 +19,7 @@ import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 import { CreateBookDto } from './dto/create-book.dto';
-import { ApiTags, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
 @ApiTags('Books')
 @Controller('books')
@@ -32,6 +32,7 @@ export class BooksController {
   })
   @ApiResponse({ status: 500, description: 'Erro interno.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar Livro' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(@Body() createBookDto: CreateBookDto): Promise<Books> {
@@ -40,6 +41,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os Livros' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Books[]> {
@@ -49,6 +51,7 @@ export class BooksController {
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @ApiResponse({ status: 500, description: 'Erro interno.' })
+  @ApiOperation({ summary: 'Encontrar um Livro por ID' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Books> {
@@ -57,6 +60,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pelo Título' })
   @Get('/title/:title')
   @UsePipes(ValidationPipe)
   async findTitle(@Param('title') title: string): Promise<Books[]> {
@@ -65,6 +69,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do Livro' })
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
@@ -77,6 +82,7 @@ export class BooksController {
   //Rotas de Categoria
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pela Categoria' })
   @Get('/category/:category')
   @UsePipes(ValidationPipe)
   async findCategory(@Param('category') category: string): Promise<Category[]> {
@@ -85,6 +91,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar uma nova categoria' })
   @Post('add/category')
   @UsePipes(ValidationPipe)
   async addCategory(
@@ -95,6 +102,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover categoria' })
   @Post('remove/category')
   async removeCategory(
     @Body() removeCategoryDto: RemoveBookCategoryDto,
@@ -105,6 +113,7 @@ export class BooksController {
   //Rotas de Author
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pelo Autor' })
   @Get('/author/:author')
   @UsePipes(ValidationPipe)
   async findAuthor(@Param('author') author: string): Promise<Authors[]> {
@@ -113,6 +122,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar author' })
   @Post('add/author')
   @UsePipes(ValidationPipe)
   async addAuthor(@Body() addAuthorDto: AddBookAuthorDto): Promise<Books> {
@@ -121,6 +131,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover author' })
   @Post('remove/author')
   @UsePipes(ValidationPipe)
   async removeAuthor(
@@ -132,6 +143,7 @@ export class BooksController {
   //Rotas de Publisher
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pela Editora' })
   @Get('/publisher/:publisher')
   @UsePipes(ValidationPipe)
   async findPublisher(
@@ -142,6 +154,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar editora' })
   @Post('add/publisher')
   @UsePipes(ValidationPipe)
   async addPublisher(
@@ -152,6 +165,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover editora' })
   @Post('remove/publisher')
   @UsePipes(ValidationPipe)
   async removePublisher(
@@ -162,6 +176,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar Livro' })
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Books> {

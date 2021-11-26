@@ -17,7 +17,7 @@ import { UserService } from './user.service';
 import { Prisma, User } from '.prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { userWithoutPasswordDto } from './dto/user-without-password.dto';
-import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('User')
@@ -30,6 +30,7 @@ export class UserController {
     description: 'Conflito de dados. Revise dados enviados.',
   })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar Usuário' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -45,6 +46,7 @@ export class UserController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os usuários' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<User[]> {
@@ -57,6 +59,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Buscar na rota base do controller' })
   @Get()
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -66,6 +69,7 @@ export class UserController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um usuário por USERNAME' })
   @Get('username/:username')
   // @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -81,6 +85,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do Usuário' })
   @Patch('update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -97,6 +102,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Desativar Usuário' })
   @Patch('disable')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -110,6 +116,7 @@ export class UserController {
   })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Soft Delete de Usuário' })
   @Patch('softdelete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -119,6 +126,7 @@ export class UserController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Hard Delete de Usuário' })
   @Delete('del/:username')
   @UsePipes(ValidationPipe)
   async remove(@Param('username') username: string): Promise<User> {
