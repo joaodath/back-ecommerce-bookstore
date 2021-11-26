@@ -19,6 +19,7 @@ import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -52,7 +53,7 @@ export class BooksController {
   @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateBookDto: Prisma.BooksUpdateInput,
+    @Body() updateBookDto: UpdateBookDto,
   ): Promise<Books> {
     return await this.booksService.update(id, updateBookDto);
   }
