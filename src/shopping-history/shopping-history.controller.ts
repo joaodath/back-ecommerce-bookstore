@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ShoppingHistoryService } from './shopping-history.service';
 import { Prisma, ShoppingHistory } from '.prisma/client';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Shopping-History')
 @Controller('shopping-history')
@@ -21,6 +21,7 @@ export class ShoppingHistoryController {
     private readonly shoppingHistoryService: ShoppingHistoryService,
   ) {}
 
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -29,12 +30,14 @@ export class ShoppingHistoryController {
     return await this.shoppingHistoryService.create(createShoppingHistoryDto);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<ShoppingHistory[]> {
     return await this.shoppingHistoryService.findAll();
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(
@@ -43,6 +46,7 @@ export class ShoppingHistoryController {
     return await this.shoppingHistoryService.findUnique(id);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
@@ -55,6 +59,7 @@ export class ShoppingHistoryController {
     );
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async remove(
