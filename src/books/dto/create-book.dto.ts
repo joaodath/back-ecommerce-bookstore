@@ -76,24 +76,12 @@ export class CreateBookDto {
   inventoryAmount?: number;
 
   @IsOptional()
-  @IsNumber()
-  authorId?: number;
-
-  @IsOptional()
   @IsString()
   author?: string;
 
   @IsOptional()
-  @IsNumber()
-  categoryId?: number;
-
-  @IsOptional()
   @IsString()
   category?: string;
-
-  @IsOptional()
-  @IsNumber()
-  publisherId?: number;
 
   @IsOptional()
   @IsString()

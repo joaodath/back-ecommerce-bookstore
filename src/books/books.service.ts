@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PublisherService } from 'src/publisher/publisher.service';
@@ -11,6 +15,7 @@ import { AddBookAuthorDto } from 'src/author/dto/add-book-author.dto';
 import { RemoveBookAuthorDto } from 'src/author/dto/remove-book-author.dto';
 import { RemoveBookCategoryDto } from 'src/category/dto/remove-book-category.dto';
 import { CreateBookDto } from './dto/create-book.dto';
+import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BooksService {
@@ -38,27 +43,19 @@ export class BooksService {
           throw new Error('eBook can not have dimensions');
         }
       }
-      const {
-        authorId,
-        author,
-        publisherId,
-        publisher,
-        categoryId,
-        category,
-        ...bookData
-      } = createBookDto;
+      const { author, publisher, category, ...bookData } = createBookDto;
       const bookCreated = await this.db.books.create({ data: bookData });
       if (!bookCreated) {
         throw new Error('Book not created. Try again.');
       }
 
-      if (createBookDto.authorId && createBookDto.author) {
+      if (createBookDto.author) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             author: {
               connectOrCreate: {
-                where: { id: createBookDto.authorId },
+                where: { name: createBookDto.author },
                 create: { name: createBookDto.author },
               },
             },
@@ -66,13 +63,13 @@ export class BooksService {
         });
       }
 
-      if (createBookDto.categoryId && createBookDto.category) {
+      if (createBookDto.category) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             category: {
               connectOrCreate: {
-                where: { id: createBookDto.categoryId },
+                where: { name: createBookDto.category },
                 create: { name: createBookDto.category },
               },
             },
@@ -80,13 +77,13 @@ export class BooksService {
         });
       }
 
-      if (createBookDto.publisherId && createBookDto.publisher) {
+      if (createBookDto.publisher) {
         await this.db.books.update({
           where: { id: bookCreated.id },
           data: {
             publisher: {
               connectOrCreate: {
-                where: { id: createBookDto.publisherId },
+                where: { name: createBookDto.publisher },
                 create: { name: createBookDto.publisher },
               },
             },
@@ -168,11 +165,117 @@ export class BooksService {
     });
   }
 
-  async update(
-    id: number,
-    updateBookDto: Prisma.BooksUpdateInput,
-  ): Promise<Books> {
-    return await this.db.books.update({ where: { id }, data: updateBookDto });
+  async update(id: number, updateBookDto: UpdateBookDto): Promise<Books> {
+    try {
+      if (updateBookDto.ebook) {
+        if (updateBookDto.hardCover === true) {
+          throw new ConflictException(
+            'Book can not be both e-book and hard cover',
+          );
+        }
+        if (updateBookDto.weight) {
+          throw new ConflictException('eBook can not have weight');
+        }
+        if (
+          updateBookDto.length ||
+          updateBookDto.width ||
+          updateBookDto.height
+        ) {
+          throw new ConflictException('eBook can not have dimensions');
+        }
+      }
+      const { author, publisher, category, ...bookData } = updateBookDto;
+
+      const bookUpdated = await this.db.books.update({
+        where: { id },
+        data: bookData,
+        include: {
+          author: true,
+          category: true,
+          publisher: true,
+        },
+      });
+      if (!bookUpdated) {
+        throw new Error('Book not updated. Try again.');
+      }
+
+      if (updateBookDto.author) {
+        for (const singleAuthor of bookUpdated.author) {
+          await this.db.books.update({
+            where: { id: bookUpdated.id },
+            data: {
+              author: {
+                disconnect: { id: singleAuthor.id },
+              },
+            },
+          });
+        }
+        await this.db.books.update({
+          where: { id: bookUpdated.id },
+          data: {
+            author: {
+              connectOrCreate: {
+                where: { name: updateBookDto.author },
+                create: { name: updateBookDto.author },
+              },
+            },
+          },
+        });
+      }
+
+      if (updateBookDto.category) {
+        for (const singleCategory of bookUpdated.category) {
+          await this.db.books.update({
+            where: { id: bookUpdated.id },
+            data: {
+              category: {
+                disconnect: { id: singleCategory.id },
+              },
+            },
+          });
+        }
+        await this.db.books.update({
+          where: { id: bookUpdated.id },
+          data: {
+            category: {
+              connectOrCreate: {
+                where: { name: updateBookDto.category },
+                create: { name: updateBookDto.category },
+              },
+            },
+          },
+        });
+      }
+
+      if (updateBookDto.publisher) {
+        for (const singlePublisher of bookUpdated.publisher) {
+          await this.db.books.update({
+            where: { id: bookUpdated.id },
+            data: {
+              publisher: {
+                disconnect: { id: singlePublisher.id },
+              },
+            },
+          });
+        }
+        await this.db.books.update({
+          where: { id: bookUpdated.id },
+          data: {
+            publisher: {
+              connectOrCreate: {
+                where: { name: updateBookDto.publisher },
+                create: { name: updateBookDto.publisher },
+              },
+            },
+          },
+        });
+      }
+
+      return await this.findUnique(bookUpdated.id);
+    } catch (err) {
+      console.log(err);
+      throw new Error('An error happened. Try again!');
+    }
   }
 
   async remove(id: number): Promise<Books> {
