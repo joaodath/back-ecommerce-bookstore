@@ -20,8 +20,7 @@ import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { ApiHeader } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Cart')
 @Controller('cart')
@@ -40,6 +39,10 @@ export class CartController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -47,12 +50,17 @@ export class CartController {
     return await this.cartService.getCartUser(req.user.username);
   }
 
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('anon')
   @UsePipes(ValidationPipe)
   async getCartAnon(@Body() getCartDto: GetCartDto): Promise<ShoppingCart> {
     return await this.cartService.getCartAnon(getCartDto);
   }
 
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @Get('new/anon')
   @UsePipes(ValidationPipe)
   async createAnonCart(): Promise<ShoppingCart> {
@@ -63,6 +71,7 @@ export class CartController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Post('new/user')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -80,6 +89,7 @@ export class CartController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Post('user/item/add')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -94,6 +104,7 @@ export class CartController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Patch('user/item/update')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -107,12 +118,14 @@ export class CartController {
     );
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Post('anon/item/add')
   @UsePipes(ValidationPipe)
   async addItemAnon(@Body() addItemDto: AddItemDto): Promise<ShoppingCart> {
     return await this.cartService.addItemAnon(addItemDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Patch('anon/item/update')
   @UsePipes(ValidationPipe)
   async updateItemAnon(
@@ -125,6 +138,7 @@ export class CartController {
     name: 'Authorization',
     description: 'JWT Token',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Delete('user/item/delete')
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -138,6 +152,7 @@ export class CartController {
     );
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @Delete('anon/item/delete')
   @UsePipes(ValidationPipe)
   async deleteItemAnon(
