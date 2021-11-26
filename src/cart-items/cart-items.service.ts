@@ -5,6 +5,7 @@ import { BooksService } from 'src/books/books.service';
 import { CreateCartItemsDto } from './dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
 import { ShippingPackageBasicDto } from 'src/cep/dto/shipping-package.dto';
+import { DeleteItemDto } from 'src/cart/dto/delete-item.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
@@ -214,8 +215,18 @@ export class ShoppingCartItemsService {
     });
   }
 
-  async removeItem(id: number): Promise<ShoppingCartItems> {
-    return await this.db.shoppingCartItems.delete({ where: { id } });
+  async removeItem(deleteItemDto: DeleteItemDto): Promise<ShoppingCartItems> {
+    const cartItem: ShoppingCartItems = await this.findManyBookId(
+      deleteItemDto.shoppingCartId,
+      deleteItemDto.bookId,
+    );
+    if (cartItem instanceof Object) {
+      return await this.db.shoppingCartItems.delete({
+        where: { id: cartItem.id },
+      });
+    } else {
+      throw new NotFoundException();
+    }
   }
 
   // async createShippingPackage(

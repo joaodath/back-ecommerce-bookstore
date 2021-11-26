@@ -346,7 +346,7 @@ export class ShoppingCartService {
     if (cartItem === -1) {
       throw new NotFoundException();
     } else {
-      return await this.cartItems.removeItem(deleteItemDto.bookId);
+      return await this.cartItems.removeItem(deleteItemDto);
     }
   }
 
@@ -365,7 +365,7 @@ export class ShoppingCartService {
       if (cartItem === -1) {
         throw new NotFoundException();
       } else {
-        return await this.cartItems.removeItem(deleteItemDto.bookId);
+        return await this.cartItems.removeItem(deleteItemDto);
       }
     } else {
       throw new ConflictException();
