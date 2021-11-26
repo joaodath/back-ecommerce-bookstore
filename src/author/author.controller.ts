@@ -16,11 +16,16 @@ import { Authors } from '.prisma/client';
 import { CreateAuthorDto } from './dto/create-author.dto';
 import { UpdateAuthorDto } from './dto/update-author.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Author')
 @Controller('author')
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar Author' })
   @Post('new')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -28,24 +33,36 @@ export class AuthorController {
     return await this.authorService.create(createAuthorDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os Author' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Authors[]> {
     return await this.authorService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Author por ID' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Authors> {
     return await this.authorService.findUnique(id);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Author pelo Name' })
   @Get('/name/:name')
   @UsePipes(ValidationPipe)
   async findName(@Param('name') name: string): Promise<Authors[]> {
     return await this.authorService.findByName(name);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do Author' })
   @Patch('/update/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
@@ -56,6 +73,9 @@ export class AuthorController {
     return await this.authorService.update(id, updateAuthorDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar Author' })
   @Delete('delete/:id')
   //@UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
