@@ -11,13 +11,14 @@ import {
 } from '@nestjs/common';
 import { CouponCodesService } from './coupon-codes.service';
 import { Prisma, CouponCodes } from '.prisma/client';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Coupon-Codes')
 @Controller('coupon-codes')
 export class CouponCodesController {
   constructor(private readonly couponCodesService: CouponCodesService) {}
 
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -26,18 +27,21 @@ export class CouponCodesController {
     return await this.couponCodesService.create(createCouponCodeDto);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<CouponCodes[]> {
     return await this.couponCodesService.findAll();
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Get('/code/:code')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('code') code: string): Promise<CouponCodes> {
     return this.couponCodesService.findUnique(code);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch(':code')
   @UsePipes(ValidationPipe)
   async update(
@@ -47,6 +51,7 @@ export class CouponCodesController {
     return this.couponCodesService.update(code, updateCouponCodeDto);
   }
 
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete(':code')
   @UsePipes(ValidationPipe)
   async remove(@Param('code') code: string): Promise<CouponCodes> {
