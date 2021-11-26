@@ -66,6 +66,11 @@ export class CreateUserDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  neighborhood?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   address?: string;
 
   @ApiPropertyOptional()
