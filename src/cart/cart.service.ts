@@ -261,12 +261,12 @@ export class ShoppingCartService {
           include: { shoppingCartItems: true },
         });
       } else {
-        const updateCartItem: UpdateCartItemsDto = {
+        const updateCartItem: CreateCartItemsDto = {
           shoppingCartId: addItemDto.shoppingCartId,
           bookId: addItemDto.bookId,
           quantity: addItemDto.quantity,
         };
-        const cartUpdate = await this.cartItems.updateItem(updateCartItem);
+        const cartUpdate = await this.cartItems.createItem(updateCartItem);
         return await this.findUnique(addItemDto.shoppingCartId);
       }
     } else {
