@@ -11,11 +11,16 @@ import {
 } from '@nestjs/common';
 import { CouponCodesService } from './coupon-codes.service';
 import { Prisma, CouponCodes } from '.prisma/client';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Coupon-Codes')
 @Controller('coupon-codes')
 export class CouponCodesController {
   constructor(private readonly couponCodesService: CouponCodesService) {}
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar CouponCode' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(
@@ -24,18 +29,27 @@ export class CouponCodesController {
     return await this.couponCodesService.create(createCouponCodeDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os CouponCode' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<CouponCodes[]> {
     return await this.couponCodesService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um CouponCode por ID' })
   @Get('/code/:code')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('code') code: string): Promise<CouponCodes> {
     return this.couponCodesService.findUnique(code);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do CouponCode' })
   @Patch(':code')
   @UsePipes(ValidationPipe)
   async update(
@@ -45,6 +59,9 @@ export class CouponCodesController {
     return this.couponCodesService.update(code, updateCouponCodeDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar CouponCode' })
   @Delete(':code')
   @UsePipes(ValidationPipe)
   async remove(@Param('code') code: string): Promise<CouponCodes> {
