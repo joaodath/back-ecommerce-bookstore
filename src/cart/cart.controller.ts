@@ -55,6 +55,7 @@ export class CartController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('anon')
   @UsePipes(ValidationPipe)
@@ -136,6 +137,10 @@ export class CartController {
   }
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Patch('anon/item/update')
   @UsePipes(ValidationPipe)
@@ -164,6 +169,10 @@ export class CartController {
     );
   }
 
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
   @Delete('anon/item/delete')

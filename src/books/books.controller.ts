@@ -30,6 +30,7 @@ export class BooksController {
     status: 409,
     description: 'Conflito de dados. Revise dados enviados.',
   })
+  @ApiResponse({ status: 500, description: 'Erro interno.' })
   @ApiResponse({ status: 201, description: 'Recurso criado' })
   @Post('new')
   @UsePipes(ValidationPipe)
@@ -47,6 +48,7 @@ export class BooksController {
 
   @ApiResponse({ status: 404, description: 'Não encontrado.' })
   @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiResponse({ status: 500, description: 'Erro interno.' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Books> {
