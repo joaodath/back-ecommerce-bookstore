@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Books, Publisher, Authors, Category } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PublisherService } from 'src/publisher/publisher.service';
@@ -25,17 +29,19 @@ export class BooksService {
     try {
       if (createBookDto.ebook) {
         if (createBookDto.hardCover === true) {
-          throw new Error('Book can not be both e-book and hard cover');
+          throw new ConflictException(
+            'Book can not be both e-book and hard cover',
+          );
         }
         if (createBookDto.weight) {
-          throw new Error('eBook can not have weight');
+          throw new ConflictException('eBook can not have weight');
         }
         if (
           createBookDto.length ||
           createBookDto.width ||
           createBookDto.height
         ) {
-          throw new Error('eBook can not have dimensions');
+          throw new ConflictException('eBook can not have dimensions');
         }
       }
       const {
