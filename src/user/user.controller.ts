@@ -8,7 +8,6 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
-  ParseIntPipe,
   Request,
   UseGuards,
   ConflictException,

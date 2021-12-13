@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UsePipes,
-  UseGuards,
   ValidationPipe,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -15,7 +14,7 @@ import { PublisherService } from './publisher.service';
 import { Publisher } from '.prisma/client';
 import { CreatePublisherDto } from './dto/create-publisher.dto';
 import { UpdatePublisherDto } from './dto/update-publisher.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+//import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Publisher')
