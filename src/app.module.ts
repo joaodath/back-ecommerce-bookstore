@@ -15,6 +15,7 @@ import { PublisherModule } from './publisher/publisher.module';
 import { CategoryModule } from './category/category.module';
 import { AuthorModule } from './author/author.module';
 import { CepModule } from './cep/cep.module';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CepModule } from './cep/cep.module';
     CartModule,
     CouponCodesModule,
     CepModule,
+    CheckoutModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
