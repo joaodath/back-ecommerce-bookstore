@@ -77,7 +77,7 @@ export class ShoppingCartService {
       }
     }
   }
-  // end of toolbelt functions
+  // end of toolbelt methods
 
   async createAnonCart(): Promise<ShoppingCart> {
     const newCart = await this.db.shoppingCart.create({
@@ -93,10 +93,10 @@ export class ShoppingCartService {
     createUserCartDto?: CreateUserCartDto,
   ): Promise<ShoppingCart> {
     /**
-     * This function is responsible for creating a new cart for a user.
+     * This method is responsible for creating a new cart for a user.
      * If a registered user already have a cart, it will return the cart.
      * If not, it will create a new cart and return it.
-     * Additionally, if the user were previously anonymous, the function will
+     * Additionally, if the user were previously anonymous, the method will
      * update the previously stored cart with the new items.
      */
 
@@ -205,20 +205,22 @@ export class ShoppingCartService {
     username: string,
     addItemDto: AddItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCartId = await this.db.shoppingCart.findUnique({
+    const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
-    addItemDto.shoppingCartId = shoppingCartId.id;
+    addItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.cartItems.findManyBookId(
       addItemDto.shoppingCartId,
       addItemDto.bookId,
     );
     if (cartItem === -1) {
       const bookObject = await this.book.findUnique(addItemDto.bookId);
+
       const bookPrice =
         bookObject.discountCheck === true
           ? bookObject.discountedPrice
           : bookObject.price;
+
       const createCartItemsDto: CreateCartItemsDto = {
         shoppingCartId: addItemDto.shoppingCartId,
         bookId: addItemDto.bookId,
@@ -226,20 +228,19 @@ export class ShoppingCartService {
         quantity: addItemDto.quantity,
       };
       await this.cartItems.createItem(createCartItemsDto);
-      await this.updateTotalCartPrice(shoppingCartId.id);
-      return this.db.shoppingCart.findUnique({
-        where: { id: addItemDto.shoppingCartId },
-        include: { shoppingCartItems: true },
-      });
+      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+      return updatedCart;
     } else {
       const updateCartItem: CreateCartItemsDto = {
         shoppingCartId: addItemDto.shoppingCartId,
         bookId: addItemDto.bookId,
         quantity: addItemDto.quantity,
       };
-      const cartUpdate = await this.cartItems.createItem(updateCartItem);
-      await this.updateTotalCartPrice(shoppingCartId.id);
-      return await this.findUnique(addItemDto.shoppingCartId);
+      await this.cartItems.createItem(updateCartItem);
+      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+      return updatedCart;
     }
   }
 
@@ -265,20 +266,19 @@ export class ShoppingCartService {
           quantity: addItemDto.quantity,
         };
         await this.cartItems.createItem(createCartItemsDto);
-        await this.updateTotalCartPrice(shoppingCart.id);
-        return this.db.shoppingCart.findUnique({
-          where: { id: addItemDto.shoppingCartId },
-          include: { shoppingCartItems: true },
-        });
+        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+        return updatedCart;
       } else {
         const updateCartItem: CreateCartItemsDto = {
           shoppingCartId: addItemDto.shoppingCartId,
           bookId: addItemDto.bookId,
           quantity: addItemDto.quantity,
         };
-        const cartUpdate = await this.cartItems.createItem(updateCartItem);
-        await this.updateTotalCartPrice(shoppingCart.id);
-        return await this.findUnique(addItemDto.shoppingCartId);
+        await this.cartItems.createItem(updateCartItem);
+        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+        return updatedCart;
       }
     } else {
       throw new ConflictException();
@@ -289,17 +289,18 @@ export class ShoppingCartService {
     username: string,
     updateItemDto: UpdateItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCartId = await this.db.shoppingCart.findUnique({
+    const shoppingCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
-    updateItemDto.shoppingCartId = shoppingCartId.id;
+    updateItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.cartItems.findUnique(
       updateItemDto.shoppingCartItemId,
     );
     if (cartItem) {
-      const updateItem = await this.cartItems.updateItem(updateItemDto);
-      await this.updateTotalCartPrice(shoppingCartId.id);
-      return await this.findUnique(updateItemDto.shoppingCartId);
+      await this.cartItems.updateItem(updateItemDto);
+      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+      return updatedCart;
     } else {
       throw new NotFoundException();
     }
@@ -314,9 +315,10 @@ export class ShoppingCartService {
         updateItemDto.shoppingCartItemId,
       );
       if (cartItem) {
-        const updateItem = await this.cartItems.updateItem(updateItemDto);
-        await this.updateTotalCartPrice(shoppingCart.id);
-        return await this.findUnique(updateItemDto.shoppingCartId);
+        await this.cartItems.updateItem(updateItemDto);
+        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+
+        return updatedCart;
       } else {
         throw new NotFoundException();
       }
