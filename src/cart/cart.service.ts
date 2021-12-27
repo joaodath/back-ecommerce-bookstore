@@ -3,18 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, ShoppingCart, ShoppingCartItems } from '.prisma/client';
+import { ShoppingCart } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
 import { BooksService } from 'src/books/books.service';
 import { AddItemDto } from './dto/add-item.dto';
 import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
-import { UpdateCartItemsDto } from 'src/cart-items/dto/update-cart-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
-import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
+//import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
 
 @Injectable()
 export class ShoppingCartService {
@@ -24,18 +23,62 @@ export class ShoppingCartService {
     private book: BooksService,
   ) {}
 
+  // toolbelt methods
+  async findUnique(id: number): Promise<ShoppingCart> {
+    return await this.db.shoppingCart.findUnique({
+      where: { id: id },
+      include: {
+        shoppingCartItems: {
+          include: {
+            book: {
+              select: {
+                title: true,
+                author: true,
+                publisher: true,
+                coverImg: true,
+              },
+            },
+          },
+        },
+        couponCode: {
+          select: {
+            code: true,
+            discountAmount: true,
+          },
+        },
+      },
+    });
+  }
+
   async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
     const totalCartPrice = await this.cartItems.calculateTotalPrice(
       shoppingCartId,
     );
-    const cartUpdated = await this.db.shoppingCart.update({
+    await this.db.shoppingCart.update({
       where: { id: shoppingCartId },
       data: {
         totalPrice: totalCartPrice,
       },
     });
-    return cartUpdated;
+
+    const updatedCart = await this.findUnique(shoppingCartId);
+
+    return updatedCart;
   }
+
+  async updateCartOwner(userCartId: number, anonymousCartId: number) {
+    const cartItems = await this.cartItems.findMany(anonymousCartId);
+    for (const singleCartItem of cartItems) {
+      const checkCartItem = await this.findUnique(
+        singleCartItem.shoppingCartId,
+      );
+      if (checkCartItem.isAnonymous === true) {
+        await this.cartItems.connectNewOwner(singleCartItem.id, userCartId);
+      }
+    }
+  }
+  // end of toolbelt functions
+
   async createAnonCart(): Promise<ShoppingCart> {
     const newCart = await this.db.shoppingCart.create({
       data: {
@@ -49,7 +92,15 @@ export class ShoppingCartService {
     username: string,
     createUserCartDto?: CreateUserCartDto,
   ): Promise<ShoppingCart> {
-    const isThereACart = await this.db.shoppingCart.findUnique({
+    /**
+     * This function is responsible for creating a new cart for a user.
+     * If a registered user already have a cart, it will return the cart.
+     * If not, it will create a new cart and return it.
+     * Additionally, if the user were previously anonymous, the function will
+     * update the previously stored cart with the new items.
+     */
+
+    const storedUserCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
       include: {
         user: {
@@ -62,31 +113,20 @@ export class ShoppingCartService {
         shoppingCartItems: true,
       },
     });
-    if (isThereACart) {
+
+    if (storedUserCart) {
       if (createUserCartDto.cartId) {
         // if there is a cart for the user and a cartId is passed, update the cart
-        const cartItems = await this.cartItems.findMany(
-          createUserCartDto.cartId,
-        );
-        for (const singleCartItem of cartItems) {
-          const checkCartItem = await this.findUnique(
-            singleCartItem.shoppingCartId,
-          );
-          if (checkCartItem.isAnonymous === true) {
-            await this.cartItems.connectNewOwner(
-              singleCartItem.id,
-              isThereACart.id,
-            );
-          }
-        }
-        await this.updateTotalCartPrice(isThereACart.id);
+
+        await this.updateCartOwner(storedUserCart.id, createUserCartDto.cartId);
+        await this.updateTotalCartPrice(storedUserCart.id);
       } else {
         // if there is a cart for the user and no cartId is passed, return the cart
-        return isThereACart;
+        return storedUserCart;
       }
     } else {
       // if there is no cart for the user, create a new cart
-      const newCart = await this.db.shoppingCart.create({
+      const newUserCart = await this.db.shoppingCart.create({
         data: {
           username: username,
           isAnonymous: false,
@@ -99,22 +139,13 @@ export class ShoppingCartService {
       });
 
       if (createUserCartDto.cartId) {
-        // if there's a cartId, connect the new cart as owner of the cart items
-        const cartItems = await this.cartItems.findMany(
-          createUserCartDto.cartId,
-        );
-        for (const singleCartItem of cartItems) {
-          const checkCartItem = await this.findUnique(
-            singleCartItem.shoppingCartId,
-          );
-          if (checkCartItem.isAnonymous === true) {
-            await this.cartItems.connectNewOwner(singleCartItem.id, newCart.id);
-          }
-        }
+        await this.updateCartOwner(newUserCart.id, createUserCartDto.cartId);
       }
-      await this.updateTotalCartPrice(newCart.id);
+
+      await this.updateTotalCartPrice(newUserCart.id);
+
       const userCartReady = await this.db.shoppingCart.findUnique({
-        where: { id: newCart.id },
+        where: { id: newUserCart.id },
         include: {
           user: {
             select: {
@@ -131,36 +162,14 @@ export class ShoppingCartService {
   }
 
   async getCartUser(username: string): Promise<ShoppingCart> {
-    const isShoppingCart = await this.db.shoppingCart.findUnique({
+    const storedShoppingCart = await this.db.shoppingCart.findUnique({
       where: { username: username },
     });
-    if (isShoppingCart) {
-      await this.updateTotalCartPrice(isShoppingCart.id);
-      const shoppingCart = await this.db.shoppingCart.findUnique({
-        where: {
-          username: username,
-        },
-        include: {
-          shoppingCartItems: {
-            include: {
-              book: {
-                select: {
-                  title: true,
-                  author: true,
-                  publisher: true,
-                  coverImg: true,
-                },
-              },
-            },
-          },
-          couponCode: {
-            select: {
-              code: true,
-              discountAmount: true,
-            },
-          },
-        },
-      });
+    if (storedShoppingCart) {
+      const shoppingCart = await this.updateTotalCartPrice(
+        storedShoppingCart.id,
+      );
+
       return shoppingCart;
     } else {
       throw new NotFoundException();
@@ -168,39 +177,17 @@ export class ShoppingCartService {
   }
 
   async getCartAnon(getCartDto: GetCartDto): Promise<ShoppingCart> {
-    const isShoppingCart = await this.db.shoppingCart.findUnique({
+    const storedShoppingCart = await this.db.shoppingCart.findUnique({
       where: {
         id: getCartDto.shoppingCartId,
       },
     });
-    if (isShoppingCart) {
-      if (isShoppingCart.isAnonymous === true) {
-        await this.updateTotalCartPrice(isShoppingCart.id);
-        const shoppingCart = await this.db.shoppingCart.findUnique({
-          where: {
-            id: getCartDto.shoppingCartId,
-          },
-          include: {
-            shoppingCartItems: {
-              include: {
-                book: {
-                  select: {
-                    title: true,
-                    author: true,
-                    publisher: true,
-                    coverImg: true,
-                  },
-                },
-              },
-            },
-            couponCode: {
-              select: {
-                code: true,
-                discountAmount: true,
-              },
-            },
-          },
-        });
+    if (storedShoppingCart) {
+      if (storedShoppingCart.isAnonymous === true) {
+        const shoppingCart = await this.updateTotalCartPrice(
+          storedShoppingCart.id,
+        );
+
         return shoppingCart;
       } else {
         throw new ConflictException('Not anonymous');
@@ -336,26 +323,6 @@ export class ShoppingCartService {
     } else {
       throw new ConflictException();
     }
-  }
-
-  async findUnique(id: number): Promise<ShoppingCart> {
-    return await this.db.shoppingCart.findUnique({
-      where: { id: id },
-      include: {
-        shoppingCartItems: {
-          include: {
-            book: {
-              select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
-              },
-            },
-          },
-        },
-      },
-    });
   }
 
   async deleteItemUser(
