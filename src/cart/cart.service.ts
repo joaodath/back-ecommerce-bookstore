@@ -8,11 +8,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
 import { BooksService } from 'src/books/books.service';
 import { AddItemDto } from './dto/add-item.dto';
-import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
+import { ShoppingCartToolbelt } from './cart.toolbelt.service';
 //import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
 
 @Injectable()
@@ -21,63 +21,8 @@ export class ShoppingCartService {
     private db: PrismaService,
     private cartItems: ShoppingCartItemsService,
     private book: BooksService,
+    private toolbelt: ShoppingCartToolbelt,
   ) {}
-
-  // toolbelt methods
-  async findUnique(id: number): Promise<ShoppingCart> {
-    return await this.db.shoppingCart.findUnique({
-      where: { id: id },
-      include: {
-        shoppingCartItems: {
-          include: {
-            book: {
-              select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
-              },
-            },
-          },
-        },
-        couponCode: {
-          select: {
-            code: true,
-            discountAmount: true,
-          },
-        },
-      },
-    });
-  }
-
-  async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
-    const totalCartPrice = await this.cartItems.calculateTotalPrice(
-      shoppingCartId,
-    );
-    await this.db.shoppingCart.update({
-      where: { id: shoppingCartId },
-      data: {
-        totalPrice: totalCartPrice,
-      },
-    });
-
-    const updatedCart = await this.findUnique(shoppingCartId);
-
-    return updatedCart;
-  }
-
-  async updateCartOwner(userCartId: number, anonymousCartId: number) {
-    const cartItems = await this.cartItems.findMany(anonymousCartId);
-    for (const singleCartItem of cartItems) {
-      const checkCartItem = await this.findUnique(
-        singleCartItem.shoppingCartId,
-      );
-      if (checkCartItem.isAnonymous === true) {
-        await this.cartItems.connectNewOwner(singleCartItem.id, userCartId);
-      }
-    }
-  }
-  // end of toolbelt methods
 
   async createAnonCart(): Promise<ShoppingCart> {
     const newCart = await this.db.shoppingCart.create({
@@ -100,26 +45,16 @@ export class ShoppingCartService {
      * update the previously stored cart with the new items.
      */
 
-    const storedUserCart = await this.db.shoppingCart.findUnique({
-      where: { username: username },
-      include: {
-        user: {
-          select: {
-            name: true,
-            username: true,
-          },
-        },
-        couponCode: true,
-        shoppingCartItems: true,
-      },
-    });
-
+    const storedUserCart = await this.toolbelt.findUniqueUserCart(username);
     if (storedUserCart) {
       if (createUserCartDto.cartId) {
         // if there is a cart for the user and a cartId is passed, update the cart
 
-        await this.updateCartOwner(storedUserCart.id, createUserCartDto.cartId);
-        await this.updateTotalCartPrice(storedUserCart.id);
+        await this.toolbelt.updateCartOwner(
+          storedUserCart.id,
+          createUserCartDto.cartId,
+        );
+        await this.toolbelt.updateTotalCartPrice(storedUserCart.id);
       } else {
         // if there is a cart for the user and no cartId is passed, return the cart
         return storedUserCart;
@@ -139,34 +74,24 @@ export class ShoppingCartService {
       });
 
       if (createUserCartDto.cartId) {
-        await this.updateCartOwner(newUserCart.id, createUserCartDto.cartId);
+        await this.toolbelt.updateCartOwner(
+          newUserCart.id,
+          createUserCartDto.cartId,
+        );
       }
 
-      await this.updateTotalCartPrice(newUserCart.id);
+      const shoppingCart = await this.toolbelt.updateTotalCartPrice(
+        newUserCart.id,
+      );
 
-      const userCartReady = await this.db.shoppingCart.findUnique({
-        where: { id: newUserCart.id },
-        include: {
-          user: {
-            select: {
-              name: true,
-              username: true,
-            },
-          },
-          couponCode: true,
-          shoppingCartItems: true,
-        },
-      });
-      return userCartReady;
+      return shoppingCart;
     }
   }
 
   async getCartUser(username: string): Promise<ShoppingCart> {
-    const storedShoppingCart = await this.db.shoppingCart.findUnique({
-      where: { username: username },
-    });
+    const storedShoppingCart = await this.toolbelt.findUniqueUserCart(username);
     if (storedShoppingCart) {
-      const shoppingCart = await this.updateTotalCartPrice(
+      const shoppingCart = await this.toolbelt.updateTotalCartPrice(
         storedShoppingCart.id,
       );
 
@@ -184,7 +109,7 @@ export class ShoppingCartService {
     });
     if (storedShoppingCart) {
       if (storedShoppingCart.isAnonymous === true) {
-        const shoppingCart = await this.updateTotalCartPrice(
+        const shoppingCart = await this.toolbelt.updateTotalCartPrice(
           storedShoppingCart.id,
         );
 
@@ -214,34 +139,17 @@ export class ShoppingCartService {
       addItemDto.bookId,
     );
     if (cartItem === -1) {
-      const bookObject = await this.book.findUnique(addItemDto.bookId);
-
-      const bookPrice =
-        bookObject.discountCheck === true
-          ? bookObject.discountedPrice
-          : bookObject.price;
-
-      const createCartItemsDto: CreateCartItemsDto = {
-        shoppingCartId: addItemDto.shoppingCartId,
-        bookId: addItemDto.bookId,
-        price: bookPrice,
-        quantity: addItemDto.quantity,
-      };
-      await this.cartItems.createItem(createCartItemsDto);
-      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
-
-      return updatedCart;
+      //if the item does not exist in the cart, create it
+      await this.toolbelt.createCartItem(addItemDto);
     } else {
-      const updateCartItem: CreateCartItemsDto = {
-        shoppingCartId: addItemDto.shoppingCartId,
-        bookId: addItemDto.bookId,
-        quantity: addItemDto.quantity,
-      };
-      await this.cartItems.createItem(updateCartItem);
-      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
-
-      return updatedCart;
+      //if the item exists in the cart, update it
+      await this.toolbelt.updateCartItem(addItemDto);
     }
+    const updatedCart = await this.toolbelt.updateTotalCartPrice(
+      shoppingCart.id,
+    );
+
+    return updatedCart;
   }
 
   async addItemAnon(addItemDto: AddItemDto): Promise<ShoppingCart> {
@@ -254,32 +162,17 @@ export class ShoppingCartService {
         addItemDto.bookId,
       );
       if (cartItem === -1) {
-        const bookObject = await this.book.findUnique(addItemDto.bookId);
-        const bookPrice =
-          bookObject.discountCheck === true
-            ? bookObject.discountedPrice
-            : bookObject.price;
-        const createCartItemsDto: CreateCartItemsDto = {
-          shoppingCartId: addItemDto.shoppingCartId,
-          bookId: addItemDto.bookId,
-          price: bookPrice,
-          quantity: addItemDto.quantity,
-        };
-        await this.cartItems.createItem(createCartItemsDto);
-        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
-
-        return updatedCart;
+        //if the item does not exist in the cart, create it
+        await this.toolbelt.createCartItem(addItemDto);
       } else {
-        const updateCartItem: CreateCartItemsDto = {
-          shoppingCartId: addItemDto.shoppingCartId,
-          bookId: addItemDto.bookId,
-          quantity: addItemDto.quantity,
-        };
-        await this.cartItems.createItem(updateCartItem);
-        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
-
-        return updatedCart;
+        //if the item exists in the cart, update it
+        await this.toolbelt.updateCartItem(addItemDto);
       }
+      const updatedCart = await this.toolbelt.updateTotalCartPrice(
+        shoppingCart.id,
+      );
+
+      return updatedCart;
     } else {
       throw new ConflictException();
     }
@@ -298,7 +191,9 @@ export class ShoppingCartService {
     );
     if (cartItem) {
       await this.cartItems.updateItem(updateItemDto);
-      const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+      const updatedCart = await this.toolbelt.updateTotalCartPrice(
+        shoppingCart.id,
+      );
 
       return updatedCart;
     } else {
@@ -316,7 +211,9 @@ export class ShoppingCartService {
       );
       if (cartItem) {
         await this.cartItems.updateItem(updateItemDto);
-        const updatedCart = await this.updateTotalCartPrice(shoppingCart.id);
+        const updatedCart = await this.toolbelt.updateTotalCartPrice(
+          shoppingCart.id,
+        );
 
         return updatedCart;
       } else {
@@ -344,8 +241,8 @@ export class ShoppingCartService {
       throw new NotFoundException();
     } else {
       await this.cartItems.removeItem(deleteItemDto);
-      await this.updateTotalCartPrice(shoppingCart.id);
-      return await this.findUnique(shoppingCart.id);
+      await this.toolbelt.updateTotalCartPrice(shoppingCart.id);
+      return await this.toolbelt.findUnique(shoppingCart.id);
     }
   }
 
@@ -363,13 +260,11 @@ export class ShoppingCartService {
         throw new NotFoundException();
       } else {
         await this.cartItems.removeItem(deleteItemDto);
-        await this.updateTotalCartPrice(shoppingCart.id);
-        return await this.findUnique(shoppingCart.id);
+        await this.toolbelt.updateTotalCartPrice(shoppingCart.id);
+        return await this.toolbelt.findUnique(shoppingCart.id);
       }
     } else {
       throw new ConflictException();
     }
   }
-
-  //async createShippingPackage(shoppingCartId: number): Promise<ShippingPackageDto> {};
 }
