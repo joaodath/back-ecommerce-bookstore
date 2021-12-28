@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ShoppingCart, ShoppingCartItems } from '@prisma/client';
 import { BooksService } from 'src/books/books.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
+import { ShoppingCartItemsToolbelt } from 'src/cart-items/cart-items.toolbelt.service';
 import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AddItemDto } from './dto/add-item.dto';
@@ -11,6 +12,7 @@ export class ShoppingCartToolbelt {
   constructor(
     private db: PrismaService,
     private cartItems: ShoppingCartItemsService,
+    private toolbeltItems: ShoppingCartItemsToolbelt,
     private book: BooksService,
   ) {}
 
@@ -83,7 +85,7 @@ export class ShoppingCartToolbelt {
   }
 
   async updateCartOwner(userCartId: number, anonymousCartId: number) {
-    const cartItems = await this.cartItems.findMany(anonymousCartId);
+    const cartItems = await this.toolbeltItems.findMany(anonymousCartId);
     for (const singleCartItem of cartItems) {
       const checkCartItem = await this.findUnique(
         singleCartItem.shoppingCartId,
@@ -106,7 +108,9 @@ export class ShoppingCartToolbelt {
       price: bookPrice,
       quantity: addItemDto.quantity,
     };
-    const createdBook = await this.cartItems.createItem(createCartItemsDto);
+    const createdBook = await this.cartItems.createOrUpdateItem(
+      createCartItemsDto,
+    );
 
     return createdBook;
   }
@@ -117,7 +121,7 @@ export class ShoppingCartToolbelt {
       bookId: addItemDto.bookId,
       quantity: addItemDto.quantity,
     };
-    const updatedBook = await this.cartItems.createItem(updateCartItem);
+    const updatedBook = await this.cartItems.createOrUpdateItem(updateCartItem);
 
     return updatedBook;
   }
