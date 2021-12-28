@@ -6,13 +6,14 @@ import {
 import { ShoppingCart } from '.prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
-import { BooksService } from 'src/books/books.service';
+// import { BooksService } from 'src/books/books.service';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
 import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
 import { ShoppingCartToolbelt } from './cart.toolbelt.service';
+import { ShoppingCartItemsToolbelt } from 'src/cart-items/cart-items.toolbelt.service';
 //import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
 
 @Injectable()
@@ -20,8 +21,9 @@ export class ShoppingCartService {
   constructor(
     private db: PrismaService,
     private cartItems: ShoppingCartItemsService,
-    private book: BooksService,
+    // private book: BooksService,
     private toolbelt: ShoppingCartToolbelt,
+    private toolbeltItems: ShoppingCartItemsToolbelt,
   ) {}
 
   async createAnonCart(): Promise<ShoppingCart> {
@@ -97,7 +99,7 @@ export class ShoppingCartService {
 
       return shoppingCart;
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('ShoppingCart not found!');
     }
   }
 
@@ -115,7 +117,7 @@ export class ShoppingCartService {
 
         return shoppingCart;
       } else {
-        throw new ConflictException('Not anonymous');
+        throw new ConflictException('Not an anonymous cart!');
       }
     } else {
       throw new NotFoundException('ShoppingCart not found!');
@@ -134,7 +136,7 @@ export class ShoppingCartService {
       where: { username: username },
     });
     addItemDto.shoppingCartId = shoppingCart.id;
-    const cartItem = await this.cartItems.findManyBookId(
+    const cartItem = await this.toolbeltItems.findManyBookId(
       addItemDto.shoppingCartId,
       addItemDto.bookId,
     );
@@ -157,7 +159,7 @@ export class ShoppingCartService {
       where: { id: addItemDto.shoppingCartId },
     });
     if (shoppingCart.isAnonymous === true) {
-      const cartItem = await this.cartItems.findManyBookId(
+      const cartItem = await this.toolbeltItems.findManyBookId(
         addItemDto.shoppingCartId,
         addItemDto.bookId,
       );
@@ -186,7 +188,7 @@ export class ShoppingCartService {
       where: { username: username },
     });
     updateItemDto.shoppingCartId = shoppingCart.id;
-    const cartItem = await this.cartItems.findUnique(
+    const cartItem = await this.toolbeltItems.findUnique(
       updateItemDto.shoppingCartItemId,
     );
     if (cartItem) {
@@ -206,7 +208,7 @@ export class ShoppingCartService {
       where: { id: updateItemDto.shoppingCartId },
     });
     if (shoppingCart.isAnonymous === true) {
-      const cartItem = await this.cartItems.findUnique(
+      const cartItem = await this.toolbeltItems.findUnique(
         updateItemDto.shoppingCartItemId,
       );
       if (cartItem) {
@@ -232,7 +234,7 @@ export class ShoppingCartService {
       where: { username: username },
     });
     deleteItemDto.shoppingCartId = shoppingCart.id;
-    const cartItem = await this.cartItems.findManyBookId(
+    const cartItem = await this.toolbeltItems.findManyBookId(
       deleteItemDto.shoppingCartId,
       deleteItemDto.bookId,
     );
@@ -251,7 +253,7 @@ export class ShoppingCartService {
       where: { id: deleteItemDto.shoppingCartId },
     });
     if (shoppingCart.isAnonymous === true) {
-      const cartItem = await this.cartItems.findManyBookId(
+      const cartItem = await this.toolbeltItems.findManyBookId(
         deleteItemDto.shoppingCartId,
         deleteItemDto.bookId,
       );
