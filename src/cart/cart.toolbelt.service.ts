@@ -37,7 +37,7 @@ export class ShoppingCartToolbelt {
   }
 
   async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
-    const totalCartPrice = await this.cartItems.calculateTotalPrice(
+    const totalCartPrice = await this.cartItems.calculateCartTotalPrice(
       shoppingCartId,
     );
     await this.repository.updateShoppingCartTotalPrice(
