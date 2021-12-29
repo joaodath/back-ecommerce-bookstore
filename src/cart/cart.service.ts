@@ -151,7 +151,7 @@ export class ShoppingCartService {
 
       return updatedCart;
     } else {
-      throw new ConflictException();
+      throw new ConflictException('Not an anonymous cart!');
     }
   }
 
@@ -172,7 +172,7 @@ export class ShoppingCartService {
 
       return updatedCart;
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('ShoppingCartItem not found!');
     }
   }
 
@@ -192,10 +192,10 @@ export class ShoppingCartService {
 
         return updatedCart;
       } else {
-        throw new NotFoundException();
+        throw new NotFoundException('ShoppingCartItem not found!');
       }
     } else {
-      throw new ConflictException();
+      throw new ConflictException('Not an anonymous cart!');
     }
   }
 
@@ -211,7 +211,7 @@ export class ShoppingCartService {
     );
 
     if (cartItem === -1) {
-      throw new NotFoundException();
+      throw new NotFoundException('ShoppingCartItem not found!');
     } else {
       await this.cartItems.removeItem(deleteItemDto);
       await this.toolbelt.updateTotalCartPrice(shoppingCart.id);
@@ -230,14 +230,14 @@ export class ShoppingCartService {
       );
 
       if (cartItem === -1) {
-        throw new NotFoundException();
+        throw new NotFoundException('ShoppingCartItem not found!');
       } else {
         await this.cartItems.removeItem(deleteItemDto);
         await this.toolbelt.updateTotalCartPrice(shoppingCart.id);
         return await this.toolbelt.findUnique(shoppingCart.id);
       }
     } else {
-      throw new ConflictException();
+      throw new ConflictException('Not an anonymous cart!');
     }
   }
 }
