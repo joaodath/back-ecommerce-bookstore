@@ -68,6 +68,47 @@ export class ShoppingCartRepository {
     }
   }
 
+  async findManyCarts(): Promise<ShoppingCart[]> {
+    try {
+      return await this.db.shoppingCart.findMany();
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  }
+
+  async createAnonCart(): Promise<ShoppingCart> {
+    try {
+      return await this.db.shoppingCart.create({
+        data: {
+          isAnonymous: true,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  }
+
+  async createUserCart(username: string): Promise<ShoppingCart> {
+    try {
+      return await this.db.shoppingCart.create({
+        data: {
+          username: username,
+          isAnonymous: false,
+          user: {
+            connect: {
+              username: username,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error(error);
+    }
+  }
+
   async updateShoppingCartTotalPrice(
     shoppingCartId: number,
     totalCartPrice: any,

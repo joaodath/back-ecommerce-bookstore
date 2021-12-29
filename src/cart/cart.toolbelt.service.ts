@@ -24,6 +24,18 @@ export class ShoppingCartToolbelt {
     return await this.repository.findUniqueUserCart(username);
   }
 
+  async findManyCarts(): Promise<ShoppingCart[]> {
+    return await this.repository.findManyCarts();
+  }
+
+  async createAnonCart(): Promise<ShoppingCart> {
+    return await this.repository.createAnonCart();
+  }
+
+  async createUserCart(username: string): Promise<ShoppingCart> {
+    return await this.repository.createUserCart(username);
+  }
+
   async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
     const totalCartPrice = await this.cartItems.calculateTotalPrice(
       shoppingCartId,

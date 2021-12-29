@@ -4,9 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ShoppingCart } from '.prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
-// import { BooksService } from 'src/books/books.service';
 import { AddItemDto } from './dto/add-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { CreateUserCartDto } from './dto/create-user-cart.dto';
@@ -14,25 +12,16 @@ import { DeleteItemDto } from './dto/delete-item.dto';
 import { GetCartDto } from './dto/get-cart.dto';
 import { ShoppingCartToolbelt } from './cart.toolbelt.service';
 import { ShoppingCartItemsToolbelt } from 'src/cart-items/cart-items.toolbelt.service';
-//import { ShippingPackageDto } from 'src/cep/dto/shipping-package.dto';
-
 @Injectable()
 export class ShoppingCartService {
   constructor(
-    private db: PrismaService,
     private cartItems: ShoppingCartItemsService,
-    // private book: BooksService,
     private toolbelt: ShoppingCartToolbelt,
     private toolbeltItems: ShoppingCartItemsToolbelt,
   ) {}
 
   async createAnonCart(): Promise<ShoppingCart> {
-    const newCart = await this.db.shoppingCart.create({
-      data: {
-        isAnonymous: true,
-      },
-    });
-    return newCart;
+    return await this.toolbelt.createAnonCart();
   }
 
   async createUserCart(
@@ -63,17 +52,7 @@ export class ShoppingCartService {
       }
     } else {
       // if there is no cart for the user, create a new cart
-      const newUserCart = await this.db.shoppingCart.create({
-        data: {
-          username: username,
-          isAnonymous: false,
-          user: {
-            connect: {
-              username: username,
-            },
-          },
-        },
-      });
+      const newUserCart = await this.toolbelt.createUserCart(username);
 
       if (createUserCartDto.cartId) {
         await this.toolbelt.updateCartOwner(
@@ -104,11 +83,9 @@ export class ShoppingCartService {
   }
 
   async getCartAnon(getCartDto: GetCartDto): Promise<ShoppingCart> {
-    const storedShoppingCart = await this.db.shoppingCart.findUnique({
-      where: {
-        id: getCartDto.shoppingCartId,
-      },
-    });
+    const storedShoppingCart = await this.toolbelt.findUnique(
+      getCartDto.shoppingCartId,
+    );
     if (storedShoppingCart) {
       if (storedShoppingCart.isAnonymous === true) {
         const shoppingCart = await this.toolbelt.updateTotalCartPrice(
@@ -125,16 +102,14 @@ export class ShoppingCartService {
   }
 
   async getAllCarts(): Promise<ShoppingCart[]> {
-    return await this.db.shoppingCart.findMany();
+    return await this.toolbelt.findManyCarts();
   }
 
   async addItemUser(
     username: string,
     addItemDto: AddItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { username: username },
-    });
+    const shoppingCart = await this.toolbelt.findUniqueUserCart(username);
     addItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.toolbeltItems.findManyBookId(
       addItemDto.shoppingCartId,
@@ -155,9 +130,9 @@ export class ShoppingCartService {
   }
 
   async addItemAnon(addItemDto: AddItemDto): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { id: addItemDto.shoppingCartId },
-    });
+    const shoppingCart = await this.toolbelt.findUnique(
+      addItemDto.shoppingCartId,
+    );
     if (shoppingCart.isAnonymous === true) {
       const cartItem = await this.toolbeltItems.findManyBookId(
         addItemDto.shoppingCartId,
@@ -184,9 +159,7 @@ export class ShoppingCartService {
     username: string,
     updateItemDto: UpdateItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { username: username },
-    });
+    const shoppingCart = await this.toolbelt.findUniqueUserCart(username);
     updateItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.toolbeltItems.findUnique(
       updateItemDto.shoppingCartItemId,
@@ -204,9 +177,9 @@ export class ShoppingCartService {
   }
 
   async updateItemAnon(updateItemDto: UpdateItemDto): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { id: updateItemDto.shoppingCartId },
-    });
+    const shoppingCart = await this.toolbelt.findUnique(
+      updateItemDto.shoppingCartId,
+    );
     if (shoppingCart.isAnonymous === true) {
       const cartItem = await this.toolbeltItems.findUnique(
         updateItemDto.shoppingCartItemId,
@@ -230,9 +203,7 @@ export class ShoppingCartService {
     username: string,
     deleteItemDto: DeleteItemDto,
   ): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { username: username },
-    });
+    const shoppingCart = await this.toolbelt.findUniqueUserCart(username);
     deleteItemDto.shoppingCartId = shoppingCart.id;
     const cartItem = await this.toolbeltItems.findManyBookId(
       deleteItemDto.shoppingCartId,
@@ -249,9 +220,9 @@ export class ShoppingCartService {
   }
 
   async deleteItemAnon(deleteItemDto: DeleteItemDto): Promise<ShoppingCart> {
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { id: deleteItemDto.shoppingCartId },
-    });
+    const shoppingCart = await this.toolbelt.findUnique(
+      deleteItemDto.shoppingCartId,
+    );
     if (shoppingCart.isAnonymous === true) {
       const cartItem = await this.toolbeltItems.findManyBookId(
         deleteItemDto.shoppingCartId,
