@@ -4,80 +4,34 @@ import { BooksService } from 'src/books/books.service';
 import { ShoppingCartItemsService } from 'src/cart-items/cart-items.service';
 import { ShoppingCartItemsToolbelt } from 'src/cart-items/cart-items.toolbelt.service';
 import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { ShoppingCartRepository } from './cart.repository';
 import { AddItemDto } from './dto/add-item.dto';
 
 @Injectable()
 export class ShoppingCartToolbelt {
   constructor(
-    private db: PrismaService,
+    private repository: ShoppingCartRepository,
     private cartItems: ShoppingCartItemsService,
     private toolbeltItems: ShoppingCartItemsToolbelt,
     private book: BooksService,
   ) {}
 
   async findUnique(id: number): Promise<ShoppingCart> {
-    return await this.db.shoppingCart.findUnique({
-      where: { id: id },
-      include: {
-        shoppingCartItems: {
-          include: {
-            book: {
-              select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
-              },
-            },
-          },
-        },
-        couponCode: {
-          select: {
-            code: true,
-            discountAmount: true,
-          },
-        },
-      },
-    });
+    return await this.repository.findUniqueId(id);
   }
 
   async findUniqueUserCart(username: string): Promise<ShoppingCart> {
-    return await this.db.shoppingCart.findUnique({
-      where: { username: username },
-      include: {
-        shoppingCartItems: {
-          include: {
-            book: {
-              select: {
-                title: true,
-                author: true,
-                publisher: true,
-                coverImg: true,
-              },
-            },
-          },
-        },
-        couponCode: {
-          select: {
-            code: true,
-            discountAmount: true,
-          },
-        },
-      },
-    });
+    return await this.repository.findUniqueUserCart(username);
   }
 
   async updateTotalCartPrice(shoppingCartId: number): Promise<ShoppingCart> {
     const totalCartPrice = await this.cartItems.calculateTotalPrice(
       shoppingCartId,
     );
-    await this.db.shoppingCart.update({
-      where: { id: shoppingCartId },
-      data: {
-        totalPrice: totalCartPrice,
-      },
-    });
+    await this.repository.updateShoppingCartTotalPrice(
+      shoppingCartId,
+      totalCartPrice,
+    );
 
     const updatedCart = await this.findUnique(shoppingCartId);
 
