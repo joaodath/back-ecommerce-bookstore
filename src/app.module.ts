@@ -16,6 +16,7 @@ import { CategoryModule } from './category/category.module';
 import { AuthorModule } from './author/author.module';
 import { CepModule } from './cep/cep.module';
 import { CheckoutModule } from './checkout/checkout.module';
+import { RepositoryModule } from './repository/repository.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CheckoutModule } from './checkout/checkout.module';
     CouponCodesModule,
     CepModule,
     CheckoutModule,
+    RepositoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
