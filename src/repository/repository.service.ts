@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ShoppingCart } from '@prisma/client';
+import { ShoppingCart, ShoppingCartItems } from '@prisma/client';
+import { CreateCartItemsDto } from 'src/cart-items/dto/create-cart-items.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -117,6 +118,150 @@ export class RepositoryService {
         data: {
           totalPrice: totalCartPrice,
         },
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  //ShoppingCartItems
+
+  async findAllCartItems(): Promise<ShoppingCartItems[]> {
+    try {
+      return await this.db.shoppingCartItems.findMany();
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async findManyCartItemsWithShoppingCartId(
+    shoppingCartId: number,
+  ): Promise<ShoppingCartItems[]> {
+    try {
+      return await this.db.shoppingCartItems.findMany({
+        where: { shoppingCartId: shoppingCartId },
+        include: {
+          book: true,
+        },
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async findUniqueCartItem(cartItemId: number): Promise<ShoppingCartItems> {
+    try {
+      return await this.db.shoppingCartItems.findUnique({
+        where: { id: cartItemId },
+        include: {
+          book: {
+            select: {
+              title: true,
+              author: true,
+              publisher: true,
+              coverImg: true,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async createCartItem(
+    createCartItemsDto: CreateCartItemsDto,
+  ): Promise<ShoppingCartItems> {
+    try {
+      return await this.db.shoppingCartItems.create({
+        data: {
+          ...createCartItemsDto,
+          quantity: createCartItemsDto.quantity,
+          price: createCartItemsDto.price,
+          totalPrice: createCartItemsDto.totalPrice,
+          book: {
+            connect: {
+              id: createCartItemsDto.bookId,
+            },
+          },
+          shoppingCart: {
+            connect: {
+              id: createCartItemsDto.shoppingCartId,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async updateCartItemOwner(
+    cartItemId: number,
+    oldShoppingCartId: number,
+    newShoppingCartId: number,
+  ): Promise<ShoppingCartItems> {
+    try {
+      await this.db.shoppingCartItems.update({
+        where: { id: cartItemId },
+        data: {
+          shoppingCart: {
+            disconnect: {
+              id: oldShoppingCartId,
+            },
+          },
+        },
+      });
+
+      return await this.db.shoppingCartItems.update({
+        where: { id: cartItemId },
+        data: {
+          shoppingCart: {
+            connect: {
+              id: newShoppingCartId,
+            },
+          },
+        },
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async updateCartItemQuantityAndPrice(
+    cartItemId: number,
+    quantity: number,
+    totalPrice: number,
+    price?: number,
+  ): Promise<ShoppingCartItems> {
+    try {
+      if (price) {
+        return await this.db.shoppingCartItems.update({
+          where: { id: cartItemId },
+          data: {
+            quantity: quantity,
+            price: price,
+            totalPrice: totalPrice,
+          },
+        });
+      } else {
+        return await this.db.shoppingCartItems.update({
+          where: { id: cartItemId },
+          data: {
+            quantity: quantity,
+            totalPrice: totalPrice,
+          },
+        });
+      }
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
+  async removeCartItem(cartItemId: number): Promise<ShoppingCartItems> {
+    try {
+      return await this.db.shoppingCartItems.delete({
+        where: { id: cartItemId },
       });
     } catch (error) {
       throw new Error(error);

@@ -23,5 +23,10 @@ export class CreateCartItemsDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  totalPrice?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   shoppingCartItemId?: number;
 }
