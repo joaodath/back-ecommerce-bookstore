@@ -172,7 +172,7 @@ export class ShoppingCartItemsService {
   }
 
   async removeItem(deleteItemDto: DeleteItemDto): Promise<ShoppingCartItems> {
-    const cartItem: ShoppingCartItems = await this.findManyBookId(
+    const cartItem: ShoppingCartItems | number = await this.findManyBookId(
       deleteItemDto.shoppingCartId,
       deleteItemDto.bookId,
     );

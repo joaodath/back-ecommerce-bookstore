@@ -216,6 +216,7 @@ export class RepositoryService {
       return await this.db.shoppingCartItems.update({
         where: { id: cartItemId },
         data: {
+          shoppingCartId: newShoppingCartId,
           shoppingCart: {
             connect: {
               id: newShoppingCartId,

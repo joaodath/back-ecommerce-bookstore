@@ -32,9 +32,39 @@ export class ShoppingCartService {
     );
     return cartUpdated;
   }
+
+  async connectNewOwner(
+    cartId: number,
+    newOwnerCartId: number,
+  ): Promise<boolean> {
+    // TODO: Essa forma de conectar o novo dono do carrinho não está funcionando 100%. Deve atualizar o item do carrinho do usuário com o item e quantidade do carrinho anônimo e deletar o carrinho anônimo.
+    // if there is a cart for the user and a cartId is passed, update the cart with the items from the cartId passed
+    try {
+      const cartItems = await this.cartItems.findMany(cartId);
+      if (!cartItems) {
+        throw new NotFoundException('Cart not found!');
+      }
+
+      for (const singleCartItem of cartItems) {
+        const checkCartItem = await this.findUnique(
+          singleCartItem.shoppingCartId,
+        );
+        if (checkCartItem.isAnonymous === true) {
+          await this.cartItems.connectNewOwner(
+            singleCartItem.id,
+            newOwnerCartId,
+          );
+        }
+      }
+      await this.updateTotalCartPrice(newOwnerCartId);
+      return true;
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
   async createAnonCart(): Promise<ShoppingCart> {
-    const newCart = await this.repository.createAnonShoppingCart();
-    return newCart;
+    return await this.repository.createAnonShoppingCart();
   }
 
   async createUserCart(
@@ -43,23 +73,28 @@ export class ShoppingCartService {
   ): Promise<ShoppingCart> {
     const isThereACart = await this.repository.findUniqueUserCart(username);
     if (isThereACart) {
-      if (createUserCartDto.cartId) {
-        // if there is a cart for the user and a cartId is passed, update the cart
-        const cartItems = await this.cartItems.findMany(
-          createUserCartDto.cartId,
+      if (createUserCartDto.shoppingCartId) {
+        // if there is a cart for the user and a cartId is passed, update the cart with the items from the cartId passed
+        // // const cartItems = await this.cartItems.findMany(
+        // //   createUserCartDto.cartId,
+        // // );
+        // // for (const singleCartItem of cartItems) {
+        // //   const checkCartItem = await this.findUnique(
+        // //     singleCartItem.shoppingCartId,
+        // //   );
+        // //   if (checkCartItem.isAnonymous === true) {
+        // //     await this.cartItems.connectNewOwner(
+        // //       singleCartItem.id,
+        // //       isThereACart.id,
+        // //     );
+        // //   }
+        // // }
+        // // await this.updateTotalCartPrice(isThereACart.id);
+        await this.connectNewOwner(
+          createUserCartDto.shoppingCartId,
+          isThereACart.id,
         );
-        for (const singleCartItem of cartItems) {
-          const checkCartItem = await this.findUnique(
-            singleCartItem.shoppingCartId,
-          );
-          if (checkCartItem.isAnonymous === true) {
-            await this.cartItems.connectNewOwner(
-              singleCartItem.id,
-              isThereACart.id,
-            );
-          }
-        }
-        await this.updateTotalCartPrice(isThereACart.id);
+        return await this.repository.findUniqueCartId(isThereACart.id);
       } else {
         // if there is a cart for the user and no cartId is passed, return the cart
         return isThereACart;
@@ -68,26 +103,30 @@ export class ShoppingCartService {
       // if there is no cart for the user, create a new cart
       const newCart = await this.repository.createUserShoppingCart(username);
 
-      if (createUserCartDto.cartId) {
-        // if there's a cartId, connect the new cart as owner of the cart items
-        const cartItems = await this.cartItems.findMany(
-          createUserCartDto.cartId,
+      if (createUserCartDto.shoppingCartId) {
+        // if there's a cartId, connect the new user cart as owner of the cart items
+        // // const cartItems = await this.cartItems.findMany(
+        // //   createUserCartDto.cartId,
+        // // );
+        // // for (const singleCartItem of cartItems) {
+        // //   const checkCartItem = await this.findUnique(
+        // //     singleCartItem.shoppingCartId,
+        // //   );
+        // //   if (checkCartItem.isAnonymous === true) {
+        // //     await this.cartItems.connectNewOwner(singleCartItem.id, newCart.id);
+        // //   }
+        // // }
+        // // await this.updateTotalCartPrice(newCart.id);
+        await this.connectNewOwner(
+          createUserCartDto.shoppingCartId,
+          newCart.id,
         );
-        for (const singleCartItem of cartItems) {
-          const checkCartItem = await this.findUnique(
-            singleCartItem.shoppingCartId,
-          );
-          if (checkCartItem.isAnonymous === true) {
-            await this.cartItems.connectNewOwner(singleCartItem.id, newCart.id);
-          }
-        }
       }
-      await this.updateTotalCartPrice(newCart.id);
       return await this.repository.findUniqueCartId(newCart.id);
     }
   }
 
-  async getCartUser(username: string): Promise<ShoppingCart> {
+  async getUserCart(username: string): Promise<ShoppingCart> {
     const isShoppingCart = await this.repository.findUniqueUserCart(username);
     if (isShoppingCart) {
       await this.updateTotalCartPrice(isShoppingCart.id);
@@ -97,7 +136,7 @@ export class ShoppingCartService {
     }
   }
 
-  async getCartAnon(getCartDto: GetCartDto): Promise<ShoppingCart> {
+  async getAnonCart(getCartDto: GetCartDto): Promise<ShoppingCart> {
     const isShoppingCart = await this.repository.findUniqueCartId(
       getCartDto.shoppingCartId,
     );
@@ -211,7 +250,7 @@ export class ShoppingCartService {
       await this.updateTotalCartPrice(shoppingCartId.id);
       return await this.findUnique(shoppingCartId.id);
     } else {
-      throw new NotFoundException();
+      throw new NotFoundException('Item not found on this shopping cart!');
     }
   }
 
