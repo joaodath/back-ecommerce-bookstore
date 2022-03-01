@@ -30,17 +30,19 @@ export class BooksService {
     try {
       if (createBookDto.ebook) {
         if (createBookDto.hardCover === true) {
-          throw new Error('Book can not be both e-book and hard cover');
+          throw new ConflictException(
+            'Book can not be both e-book and hard cover',
+          );
         }
         if (createBookDto.weight) {
-          throw new Error('eBook can not have weight');
+          throw new ConflictException('eBook can not have weight');
         }
         if (
           createBookDto.length ||
           createBookDto.width ||
           createBookDto.height
         ) {
-          throw new Error('eBook can not have dimensions');
+          throw new ConflictException('eBook can not have dimensions');
         }
       }
       const { author, publisher, category, ...bookData } = createBookDto;

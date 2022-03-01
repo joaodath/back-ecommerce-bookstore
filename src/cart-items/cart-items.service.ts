@@ -5,6 +5,7 @@ import { BooksService } from 'src/books/books.service';
 import { CreateCartItemsDto } from './dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
 import { ShippingPackageBasicDto } from 'src/cep/dto/shipping-package.dto';
+import { DeleteItemDto } from 'src/cart/dto/delete-item.dto';
 
 @Injectable()
 export class ShoppingCartItemsService {
@@ -13,6 +14,24 @@ export class ShoppingCartItemsService {
   async createItem(
     createCartItemDto: CreateCartItemsDto,
   ): Promise<ShoppingCartItems> {
+    const doesCartItemExist = await this.findManyBookId(
+      createCartItemDto.shoppingCartId,
+      createCartItemDto.bookId,
+    );
+    if (doesCartItemExist !== -1) {
+      const newQuantity =
+        doesCartItemExist.quantity + createCartItemDto.quantity;
+      const newTotalPrice =
+        doesCartItemExist.totalPrice +
+        createCartItemDto.quantity * doesCartItemExist.price;
+      return await this.db.shoppingCartItems.update({
+        where: { id: doesCartItemExist.id },
+        data: {
+          quantity: newQuantity,
+          totalPrice: newTotalPrice,
+        },
+      });
+    }
     const bookObject = await this.book.findUnique(createCartItemDto.bookId);
     if (bookObject) {
       const bookPrice =
@@ -20,8 +39,11 @@ export class ShoppingCartItemsService {
           ? bookObject.discountedPrice
           : bookObject.price;
       const totalPrice = bookPrice * createCartItemDto.quantity;
-
-      return await this.db.shoppingCartItems.create({
+      const shoppingCart = await this.db.shoppingCart.findUnique({
+        where: { id: createCartItemDto.shoppingCartId },
+      });
+      const newTotalPrice = shoppingCart.totalPrice + totalPrice;
+      const cartItemCreated = await this.db.shoppingCartItems.create({
         data: {
           ...createCartItemDto,
           price: bookPrice,
@@ -34,6 +56,13 @@ export class ShoppingCartItemsService {
           },
         },
       });
+      await this.db.shoppingCart.update({
+        where: { id: createCartItemDto.shoppingCartId },
+        data: {
+          totalPrice: newTotalPrice,
+        },
+      });
+      return cartItemCreated;
     } else {
       throw new NotFoundException();
     }
@@ -47,17 +76,19 @@ export class ShoppingCartItemsService {
     array: ShoppingCartItems[],
     id: number,
   ): ShoppingCartItems | undefined {
-    return array.find((item) => item.id === id);
+    return array.find((item) => item.bookId === id);
   }
 
-  async findManyBookId(
-    shoppingCartId: number,
-    bookId: number,
-  ): Promise<ShoppingCartItems | number> {
+  async findManyBookId(shoppingCartId: number, bookId: number): Promise<any> {
     const cartItem = await this.db.shoppingCartItems.findMany({
       where: { shoppingCartId: shoppingCartId },
     });
+    console.log('findManyBookId: cartItem');
+    console.log(cartItem);
+
     const cartItemBookId = this.findObj(cartItem, bookId);
+    console.log('findManyBookId: cartItemBookId');
+    console.log(cartItemBookId);
 
     if (cartItemBookId) {
       return cartItemBookId;
@@ -98,6 +129,9 @@ export class ShoppingCartItemsService {
       updateCartItemDto.shoppingCartId,
       updateCartItemDto.bookId,
     );
+    const shoppingCart = await this.db.shoppingCart.findUnique({
+      where: { id: updateCartItemDto.shoppingCartId },
+    });
 
     if (cartItem !== -1) {
       const bookObject = await this.book.findUnique(updateCartItemDto.bookId);
@@ -106,11 +140,18 @@ export class ShoppingCartItemsService {
           ? bookObject.discountedPrice
           : bookObject.price;
       const totalPrice = bookPrice * updateCartItemDto.quantity;
-
-      return await this.db.shoppingCartItems.update({
-        where: { id: cartItem[0].id },
+      const newCartTotalPrice =
+        shoppingCart.totalPrice + totalPrice - cartItem.totalPrice;
+      await this.db.shoppingCart.update({
+        where: { id: updateCartItemDto.shoppingCartId },
         data: {
-          ...updateCartItemDto,
+          totalPrice: newCartTotalPrice,
+        },
+      });
+      return await this.db.shoppingCartItems.update({
+        where: { id: cartItem.id },
+        data: {
+          quantity: updateCartItemDto.quantity,
           price: bookPrice,
           totalPrice: totalPrice,
         },
@@ -174,8 +215,29 @@ export class ShoppingCartItemsService {
     });
   }
 
-  async removeItem(id: number): Promise<ShoppingCartItems> {
-    return await this.db.shoppingCartItems.delete({ where: { id } });
+  async removeItem(deleteItemDto: DeleteItemDto): Promise<ShoppingCartItems> {
+    const cartItem: ShoppingCartItems = await this.findManyBookId(
+      deleteItemDto.shoppingCartId,
+      deleteItemDto.bookId,
+    );
+    if (cartItem instanceof Object) {
+      return await this.db.shoppingCartItems.delete({
+        where: { id: cartItem.id },
+      });
+    } else {
+      throw new NotFoundException();
+    }
+  }
+
+  async calculateTotalPrice(shoppingCartId: number): Promise<number> {
+    const cartItems = await this.findMany(shoppingCartId);
+    let totalPrice = 0;
+    if (cartItems) {
+      cartItems.forEach((item) => {
+        totalPrice += item.totalPrice;
+      });
+    }
+    return totalPrice;
   }
 
   // async createShippingPackage(

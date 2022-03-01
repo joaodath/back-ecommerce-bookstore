@@ -20,35 +20,57 @@ import { AddBookPublisherDto } from 'src/publisher/dto/add-book-publisher.dto';
 import { RemoveBookPublisherDto } from 'src/publisher/dto/remove-book-publisher.dto';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Books')
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
+  @ApiResponse({
+    status: 409,
+    description: 'Conflito de dados. Revise dados enviados.',
+  })
+  @ApiResponse({ status: 500, description: 'Erro interno.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Criar Livro' })
   @Post('new')
   @UsePipes(ValidationPipe)
   async create(@Body() createBookDto: CreateBookDto): Promise<Books> {
     return await this.booksService.create(createBookDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar todos os Livros' })
   @Get('all')
   @UsePipes(ValidationPipe)
   async findAll(): Promise<Books[]> {
     return await this.booksService.findAll();
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiResponse({ status: 500, description: 'Erro interno.' })
+  @ApiOperation({ summary: 'Encontrar um Livro por ID' })
   @Get('/id/:id')
   @UsePipes(ValidationPipe)
   async findUnique(@Param('id', ParseIntPipe) id: number): Promise<Books> {
     return this.booksService.findUnique(id);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pelo Título' })
   @Get('/title/:title')
   @UsePipes(ValidationPipe)
   async findTitle(@Param('title') title: string): Promise<Books[]> {
     return await this.booksService.findByTitle(title);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Editar informações do Livro' })
   @Patch(':id')
   @UsePipes(ValidationPipe)
   async update(
@@ -59,12 +81,18 @@ export class BooksController {
   }
 
   //Rotas de Categoria
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pela Categoria' })
   @Get('/category/:category')
   @UsePipes(ValidationPipe)
   async findCategory(@Param('category') category: string): Promise<Category[]> {
     return await this.booksService.findByCategory(category);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar uma nova categoria' })
   @Post('add/category')
   @UsePipes(ValidationPipe)
   async addCategory(
@@ -73,6 +101,9 @@ export class BooksController {
     return await this.booksService.addCategory(addCategoryDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover categoria' })
   @Post('remove/category')
   async removeCategory(
     @Body() removeCategoryDto: RemoveBookCategoryDto,
@@ -81,18 +112,27 @@ export class BooksController {
   }
 
   //Rotas de Author
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pelo Autor' })
   @Get('/author/:author')
   @UsePipes(ValidationPipe)
   async findAuthor(@Param('author') author: string): Promise<Authors[]> {
     return await this.booksService.findByAuthor(author);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar author' })
   @Post('add/author')
   @UsePipes(ValidationPipe)
   async addAuthor(@Body() addAuthorDto: AddBookAuthorDto): Promise<Books> {
     return await this.booksService.addAuthor(addAuthorDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover author' })
   @Post('remove/author')
   @UsePipes(ValidationPipe)
   async removeAuthor(
@@ -102,6 +142,9 @@ export class BooksController {
   }
 
   //Rotas de Publisher
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Encontrar um Livro pela Editora' })
   @Get('/publisher/:publisher')
   @UsePipes(ValidationPipe)
   async findPublisher(
@@ -110,6 +153,9 @@ export class BooksController {
     return await this.booksService.findByPublisher(publisher);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Adicionar editora' })
   @Post('add/publisher')
   @UsePipes(ValidationPipe)
   async addPublisher(
@@ -118,6 +164,9 @@ export class BooksController {
     return await this.booksService.addPublisher(addPublisherDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 201, description: 'Recurso criado' })
+  @ApiOperation({ summary: 'Remover editora' })
   @Post('remove/publisher')
   @UsePipes(ValidationPipe)
   async removePublisher(
@@ -126,6 +175,9 @@ export class BooksController {
     return await this.booksService.removePublisher(removePublisherDto);
   }
 
+  @ApiResponse({ status: 404, description: 'Não encontrado.' })
+  @ApiResponse({ status: 200, description: 'Tudo certo' })
+  @ApiOperation({ summary: 'Deletar Livro' })
   @Delete(':id')
   @UsePipes(ValidationPipe)
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Books> {
