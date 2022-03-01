@@ -11,10 +11,13 @@ import { AuthorService } from 'src/author/author.service';
 import { CategoryService } from 'src/category/category.service';
 import { PublisherModule } from 'src/publisher/publisher.module';
 import { PublisherService } from 'src/publisher/publisher.service';
+import { RepositoryModule } from 'src/repository/repository.module';
+import { RepositoryService } from 'src/repository/repository.service';
 
 @Module({
   imports: [
     PrismaModule,
+    RepositoryModule,
     BooksModule,
     AuthorModule,
     CategoryModule,
@@ -24,6 +27,7 @@ import { PublisherService } from 'src/publisher/publisher.service';
   providers: [
     ShoppingCartItemsService,
     PrismaService,
+    RepositoryService,
     BooksService,
     ShoppingCartService,
     AuthorService,

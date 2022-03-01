@@ -5,5 +5,5 @@ export class CreateUserCartDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  cartId: number;
+  shoppingCartId: number;
 }

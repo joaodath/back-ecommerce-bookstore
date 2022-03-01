@@ -49,7 +49,7 @@ export class CartController {
   @UseGuards(JwtAuthGuard)
   @UsePipes(ValidationPipe)
   async getCartUser(@Request() req): Promise<ShoppingCart> {
-    return await this.cartService.getCartUser(req.user.username);
+    return await this.cartService.getUserCart(req.user.username);
   }
 
   @ApiResponse({ status: 200, description: 'Retorna todos os carrinhos' })
@@ -69,7 +69,7 @@ export class CartController {
   @Post('anon')
   @UsePipes(ValidationPipe)
   async getCartAnon(@Body() getCartDto: GetCartDto): Promise<ShoppingCart> {
-    return await this.cartService.getCartAnon(getCartDto);
+    return await this.cartService.getAnonCart(getCartDto);
   }
 
   @ApiResponse({

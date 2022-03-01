@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ShoppingCartItems } from '.prisma/client';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { BooksService } from 'src/books/books.service';
 import { CreateCartItemsDto } from './dto/create-cart-items.dto';
 import { UpdateCartItemsDto } from './dto/update-cart-items.dto';
 import { ShippingPackageBasicDto } from 'src/cep/dto/shipping-package.dto';
 import { DeleteItemDto } from 'src/cart/dto/delete-item.dto';
+import { RepositoryService } from 'src/repository/repository.service';
 
 @Injectable()
 export class ShoppingCartItemsService {
-  constructor(private db: PrismaService, private book: BooksService) {}
+  constructor(
+    private book: BooksService,
+    private repository: RepositoryService,
+  ) {}
 
   async createItem(
     createCartItemDto: CreateCartItemsDto,
@@ -24,13 +27,12 @@ export class ShoppingCartItemsService {
       const newTotalPrice =
         doesCartItemExist.totalPrice +
         createCartItemDto.quantity * doesCartItemExist.price;
-      return await this.db.shoppingCartItems.update({
-        where: { id: doesCartItemExist.id },
-        data: {
-          quantity: newQuantity,
-          totalPrice: newTotalPrice,
-        },
-      });
+
+      return await this.repository.updateCartItemQuantityAndPrice(
+        doesCartItemExist.id,
+        newQuantity,
+        newTotalPrice,
+      );
     }
     const bookObject = await this.book.findUnique(createCartItemDto.bookId);
     if (bookObject) {
@@ -39,29 +41,19 @@ export class ShoppingCartItemsService {
           ? bookObject.discountedPrice
           : bookObject.price;
       const totalPrice = bookPrice * createCartItemDto.quantity;
-      const shoppingCart = await this.db.shoppingCart.findUnique({
-        where: { id: createCartItemDto.shoppingCartId },
-      });
+      const shoppingCart = await this.repository.findUniqueCartId(
+        createCartItemDto.shoppingCartId,
+      );
       const newTotalPrice = shoppingCart.totalPrice + totalPrice;
-      const cartItemCreated = await this.db.shoppingCartItems.create({
-        data: {
-          ...createCartItemDto,
-          price: bookPrice,
-          totalPrice: totalPrice,
-          shoppingCart: {
-            connect: { id: createCartItemDto.shoppingCartId },
-          },
-          book: {
-            connect: { id: createCartItemDto.bookId },
-          },
-        },
-      });
-      await this.db.shoppingCart.update({
-        where: { id: createCartItemDto.shoppingCartId },
-        data: {
-          totalPrice: newTotalPrice,
-        },
-      });
+      createCartItemDto.price = bookPrice;
+      createCartItemDto.totalPrice = totalPrice;
+      const cartItemCreated = await this.repository.createCartItem(
+        createCartItemDto,
+      );
+      await this.repository.updateShoppingCartTotalPrice(
+        createCartItemDto.shoppingCartId,
+        newTotalPrice,
+      );
       return cartItemCreated;
     } else {
       throw new NotFoundException();
@@ -69,7 +61,7 @@ export class ShoppingCartItemsService {
   }
 
   async findAll(): Promise<ShoppingCartItems[]> {
-    return await this.db.shoppingCartItems.findMany();
+    return await this.repository.findAllCartItems();
   }
 
   findObj(
@@ -80,9 +72,9 @@ export class ShoppingCartItemsService {
   }
 
   async findManyBookId(shoppingCartId: number, bookId: number): Promise<any> {
-    const cartItem = await this.db.shoppingCartItems.findMany({
-      where: { shoppingCartId: shoppingCartId },
-    });
+    const cartItem = await this.repository.findManyCartItemsWithShoppingCartId(
+      shoppingCartId,
+    );
     console.log('findManyBookId: cartItem');
     console.log(cartItem);
 
@@ -98,28 +90,13 @@ export class ShoppingCartItemsService {
   }
 
   async findMany(shoppingCartId: number): Promise<ShoppingCartItems[]> {
-    return await this.db.shoppingCartItems.findMany({
-      where: { shoppingCartId: shoppingCartId },
-      include: {
-        book: true,
-      },
-    });
+    return await this.repository.findManyCartItemsWithShoppingCartId(
+      shoppingCartId,
+    );
   }
 
   async findUnique(id: number): Promise<ShoppingCartItems> {
-    return await this.db.shoppingCartItems.findUnique({
-      where: { id: id },
-      include: {
-        book: {
-          select: {
-            title: true,
-            author: true,
-            publisher: true,
-            coverImg: true,
-          },
-        },
-      },
-    });
+    return await this.repository.findUniqueCartItem(id);
   }
 
   async updateItem(
@@ -129,9 +106,9 @@ export class ShoppingCartItemsService {
       updateCartItemDto.shoppingCartId,
       updateCartItemDto.bookId,
     );
-    const shoppingCart = await this.db.shoppingCart.findUnique({
-      where: { id: updateCartItemDto.shoppingCartId },
-    });
+    const shoppingCart = await this.repository.findUniqueCartId(
+      updateCartItemDto.shoppingCartId,
+    );
 
     if (cartItem !== -1) {
       const bookObject = await this.book.findUnique(updateCartItemDto.bookId);
@@ -142,20 +119,18 @@ export class ShoppingCartItemsService {
       const totalPrice = bookPrice * updateCartItemDto.quantity;
       const newCartTotalPrice =
         shoppingCart.totalPrice + totalPrice - cartItem.totalPrice;
-      await this.db.shoppingCart.update({
-        where: { id: updateCartItemDto.shoppingCartId },
-        data: {
-          totalPrice: newCartTotalPrice,
-        },
-      });
-      return await this.db.shoppingCartItems.update({
-        where: { id: cartItem.id },
-        data: {
-          quantity: updateCartItemDto.quantity,
-          price: bookPrice,
-          totalPrice: totalPrice,
-        },
-      });
+
+      await this.repository.updateShoppingCartTotalPrice(
+        updateCartItemDto.shoppingCartId,
+        newCartTotalPrice,
+      );
+
+      return await this.repository.updateCartItemQuantityAndPrice(
+        cartItem.id,
+        updateCartItemDto.quantity,
+        totalPrice,
+        bookPrice,
+      );
     } else {
       return -1;
     }
@@ -174,56 +149,35 @@ export class ShoppingCartItemsService {
         : bookObject.price;
     const totalPrice = bookPrice * updateCartItemDto.quantity;
 
-    return await this.db.shoppingCartItems.update({
-      where: { id: cartItem[0].id },
-      data: {
-        ...updateCartItemDto,
-        price: bookPrice,
-        totalPrice: totalPrice,
-      },
-    });
+    return await this.repository.updateCartItemQuantityAndPrice(
+      cartItem.id,
+      updateCartItemDto.quantity,
+      totalPrice,
+      bookPrice,
+    );
   }
 
   async connectNewOwner(
     cartItemId: number,
     newShoppingCartId: number,
   ): Promise<ShoppingCartItems> {
-    const oldShoppingCart = await this.db.shoppingCartItems.findUnique({
-      where: {
-        id: cartItemId,
-      },
-    });
-    await this.db.shoppingCartItems.update({
-      where: { id: cartItemId },
-      data: {
-        shoppingCart: {
-          disconnect: {
-            id: oldShoppingCart.id,
-          },
-        },
-      },
-    });
-    return await this.db.shoppingCartItems.update({
-      where: { id: cartItemId },
-      data: {
-        shoppingCart: {
-          connect: {
-            id: newShoppingCartId,
-          },
-        },
-      },
-    });
+    const oldShoppingCart = await this.repository.findUniqueCartItem(
+      cartItemId,
+    );
+    return await this.repository.updateCartItemOwner(
+      cartItemId,
+      oldShoppingCart.shoppingCartId,
+      newShoppingCartId,
+    );
   }
 
   async removeItem(deleteItemDto: DeleteItemDto): Promise<ShoppingCartItems> {
-    const cartItem: ShoppingCartItems = await this.findManyBookId(
+    const cartItem: ShoppingCartItems | number = await this.findManyBookId(
       deleteItemDto.shoppingCartId,
       deleteItemDto.bookId,
     );
     if (cartItem instanceof Object) {
-      return await this.db.shoppingCartItems.delete({
-        where: { id: cartItem.id },
-      });
+      return await this.repository.removeCartItem(cartItem.id);
     } else {
       throw new NotFoundException();
     }
